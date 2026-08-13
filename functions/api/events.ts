@@ -110,7 +110,7 @@ async function loadSheetEvents(signal: AbortSignal): Promise<SheetEvent[]> {
   const { table } = parseGvizResponse(await response.text());
   const columnIndex = new Map<string, number>();
   table.cols.forEach((column, index) => {
-    if (column.label) columnIndex.set(column.label.trim(), index);
+    if (column.label) columnIndex.set(column.label.trim().replace(/\*+$/, "").trim(), index);
   });
 
   const events: SheetEvent[] = [];

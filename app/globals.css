@@ -4316,6 +4316,10 @@ html {
   margin: 0;
 }
 
+.events-toggle-past {
+  margin: 0 0 0 auto;
+}
+
 .events-grid {
   display: grid;
   gap: 1.25rem;
@@ -4467,6 +4471,11 @@ html {
 .events-card--skeleton {
   flex-direction: column;
   gap: 0.5rem;
+}
+
+.events-card--past {
+  opacity: 0.55;
+  pointer-events: none;
 }
 
 .events-empty {

@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowUpRight, CalendarDays, ExternalLink, MapPin, Tag, Users } from "lucide-react";
+import { ArrowUpRight, CalendarDays, ExternalLink, MapPin, Phone, Tag, Users } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { fetchEvents, type SheetEvent } from "@/lib/events";
 
@@ -9,8 +9,10 @@ type FilterDimension = "category" | "audience";
 type DerivedEvent = SheetEvent & {
   isRecurring: boolean;
   recurrenceLabel: string;
-  sortValue: number;
+  startValue: number;
+  hasStarted: boolean;
   endValue: number;
+  isPast: boolean;
 };
 
 type EventsState = {
@@ -36,7 +38,8 @@ function deriveEvents(events: SheetEvent[]): DerivedEvent[] {
     .map((event) => {
       const startValue = Date.parse(`${event.startDate}T00:00:00.000Z`);
       if (Number.isNaN(startValue)) return null;
-      const isRecurring = Boolean(event.recurrence) || Boolean(event.days);
+      const recurrenceText = event.recurrence.trim().toLowerCase();
+      const isRecurring = recurrenceText !== "" && recurrenceText !== "one-time";
       const endValue = event.endDate
         ? Date.parse(`${event.endDate}T00:00:00.000Z`)
         : isRecurring
@@ -47,12 +50,19 @@ function deriveEvents(events: SheetEvent[]): DerivedEvent[] {
         ...event,
         isRecurring,
         recurrenceLabel: event.recurrence || (isRecurring ? "Recurring" : "One-time"),
-        sortValue: Math.max(startValue, todayValue),
+        startValue,
+        hasStarted: startValue <= todayValue,
         endValue,
+        isPast: endValue < todayValue,
       };
     })
-    .filter((event): event is DerivedEvent => event !== null && event.endValue >= todayValue)
-    .sort((a, b) => a.sortValue - b.sortValue || a.name.localeCompare(b.name));
+    .filter((event): event is DerivedEvent => event !== null)
+    .sort((a, b) => {
+      if (a.isPast !== b.isPast) return a.isPast ? 1 : -1;
+      if (a.isPast) return b.endValue - a.endValue || a.name.localeCompare(b.name);
+      if (a.hasStarted !== b.hasStarted) return a.hasStarted ? 1 : -1;
+      return b.startValue - a.startValue || a.name.localeCompare(b.name);
+    });
 }
 
 function startDateLabel(event: DerivedEvent) {
@@ -71,6 +81,31 @@ function scheduleLabel(event: DerivedEvent) {
   return timeRange ? `${cadence} · ${timeRange}` : cadence;
 }
 
+function categoryTags(category: string): string[] {
+  return category
+    .split(/\s*&\s*/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
+const AUDIENCE_SYNONYMS: Record<string, string[]> = {
+  "Adult Male": ["Adults", "Men"],
+  "Adult Female": ["Adults", "Women"],
+  "Boys Only": ["Boys"],
+  "Girls Only": ["Girls"],
+};
+
+// Always shown as filter options, even when the sheet currently has no matching rows.
+const AUDIENCE_BASE_OPTIONS = ["Adults", "Men", "Women", "Boys", "Girls", "Youth"];
+
+function audienceTags(audience: string): string[] {
+  return audience
+    .split(/\s*&\s*/)
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .flatMap((part) => AUDIENCE_SYNONYMS[part] ?? [part]);
+}
+
 function distinctSorted(values: string[]) {
   return Array.from(new Set(values.filter((value) => typeof value === "string" && value.length > 0))).sort((a, b) =>
     a.localeCompare(b),
@@ -80,6 +115,25 @@ function distinctSorted(values: string[]) {
 function priceLabel(price: string) {
   return /^\$0(\.0+)?$/.test(price.trim()) ? "Free" : price;
 }
+
+function isPhoneNumber(value: string) {
+  return /^\+?[\d\s().-]{7,}$/.test(value.trim());
+}
+
+function telHref(value: string) {
+  return `tel:${value.replace(/[^\d+]/g, "")}`;
+}
+
+const LOCATION_MAP_LINKS: Record<string, string> = {
+  "GICC Youth Center": "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent("14888 104 Avenue, Surrey, BC"),
+  "Guildford Islamic Cultural Center":
+    "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent("15290 103A Ave #101, Surrey, BC V3R 7A2"),
+  "GICC Masjid": "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent("15290 103A Ave #101, Surrey, BC V3R 7A2"),
+  "Fraser Heights Community Park": "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent("10588 160 St, Surrey, BC V4N 0A1"), 
+  "Ibn Masood Madrasah":
+    "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent("15290 103A Ave #101, Surrey, BC V3R 7A2"),
+    "Hjorth Park": "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent("10275 148 St, Surrey, BC V3R 6S4"),
+};
 
 function driveFileId(url: string): string | null {
   const pathMatch = url.match(/\/file\/d\/([^/]+)/);
@@ -93,13 +147,29 @@ function posterProxySrc(posterLink: string) {
   return fileId ? `/api/poster?id=${encodeURIComponent(fileId)}` : posterLink;
 }
 
-function PosterThumbnail({ name, posterLink }: { name: string; posterLink?: string }) {
+function PosterThumbnail({
+  name,
+  posterLink,
+  disabled,
+}: {
+  name: string;
+  posterLink?: string;
+  disabled?: boolean;
+}) {
   const [failed, setFailed] = useState(false);
 
   if (!posterLink || failed) {
     return (
       <div className="events-card__poster events-card__poster--empty">
         <span>No poster available</span>
+      </div>
+    );
+  }
+
+  if (disabled) {
+    return (
+      <div className="events-card__poster" aria-label={`Poster for ${name}`}>
+        <img src={posterProxySrc(posterLink)} alt="" loading="lazy" onError={() => setFailed(true)} />
       </div>
     );
   }
@@ -123,6 +193,7 @@ export function EventsBoard() {
     category: new Set(),
     audience: new Set()
   });
+  const [showPast, setShowPast] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -138,22 +209,37 @@ export function EventsBoard() {
 
   const derivedEvents = useMemo(() => deriveEvents(state.events), [state.events]);
 
+  const upcomingEvents = useMemo(() => derivedEvents.filter((event) => !event.isPast), [derivedEvents]);
+  const pastEventCount = derivedEvents.length - upcomingEvents.length;
+  const baseEvents = showPast ? derivedEvents : upcomingEvents;
+
   const filterOptions = useMemo(
     () => ({
-      category: distinctSorted(derivedEvents.map((event) => event.category)),
-      audience: distinctSorted(derivedEvents.map((event) => event.audience)),
+      category: distinctSorted(derivedEvents.flatMap((event) => categoryTags(event.category))),
+      audience: distinctSorted([
+        ...AUDIENCE_BASE_OPTIONS,
+        ...derivedEvents.flatMap((event) => audienceTags(event.audience)),
+      ]),
     }),
     [derivedEvents],
   );
 
   const filteredEvents = useMemo(
     () =>
-      derivedEvents.filter((event) => {
-        if (selected.category.size > 0 && !selected.category.has(event.category)) return false;
-        if (selected.audience.size > 0 && !selected.audience.has(event.audience)) return false;
+      baseEvents.filter((event) => {
+        if (
+          selected.category.size > 0 &&
+          !categoryTags(event.category).some((tag) => selected.category.has(tag))
+        )
+          return false;
+        if (
+          selected.audience.size > 0 &&
+          !audienceTags(event.audience).some((tag) => selected.audience.has(tag))
+        )
+          return false;
         return true;
       }),
-    [derivedEvents, selected],
+    [baseEvents, selected],
   );
 
   const activeFilterCount = Object.values(selected).reduce((total, set) => total + set.size, 0);
@@ -202,6 +288,14 @@ export function EventsBoard() {
               Clear filters ({activeFilterCount})
             </button>
           ) : null}
+          <button
+            type="button"
+            className="text-link events-toggle-past"
+            aria-pressed={showPast}
+            onClick={() => setShowPast((previous) => !previous)}
+          >
+            {showPast ? "Hide past events" : `Show past events${pastEventCount > 0 ? ` (${pastEventCount})` : ""}`}
+          </button>
         </div>
 
         <div className="events-filter-bar" aria-label="Filter events">
@@ -219,14 +313,22 @@ export function EventsBoard() {
               ))
             : null}
 
-          {state.status !== "loading" && derivedEvents.length === 0 ? (
+          {state.status !== "loading" && baseEvents.length === 0 ? (
             <div className="calendar-empty events-empty">
               <CalendarDays aria-hidden="true" />
-              <h3>{state.status === "error" ? "Couldn't load events right now" : "No upcoming events"}</h3>
+              <h3>
+                {state.status === "error"
+                  ? "Couldn't load events right now"
+                  : showPast
+                    ? "No events found"
+                    : "No upcoming events"}
+              </h3>
               <p>
                 {state.status === "error"
                   ? "Please try again shortly, or reach out if this keeps happening."
-                  : "Check back soon for upcoming events."}
+                  : showPast
+                    ? "There are no past or upcoming events to show."
+                    : "Check back soon for upcoming events."}
               </p>
               {state.status === "error" ? (
                 <a className="button button--light" href="/contact/">
@@ -236,7 +338,7 @@ export function EventsBoard() {
             </div>
           ) : null}
 
-          {state.status !== "loading" && derivedEvents.length > 0 && filteredEvents.length === 0 ? (
+          {state.status !== "loading" && baseEvents.length > 0 && filteredEvents.length === 0 ? (
             <div className="calendar-empty events-empty">
               <CalendarDays aria-hidden="true" />
               <h3>No events match these filters</h3>
@@ -248,13 +350,18 @@ export function EventsBoard() {
           ) : null}
 
           {filteredEvents.map((event, index) => (
-            <article className="events-card" key={`${event.name}-${event.startDate}-${index}`}>
-              <PosterThumbnail name={event.name} posterLink={event.posterLink} />
+            <article
+              className={event.isPast ? "events-card events-card--past" : "events-card"}
+              aria-disabled={event.isPast || undefined}
+              key={`${event.name}-${event.startDate}-${index}`}
+            >
+              <PosterThumbnail name={event.name} posterLink={event.posterLink} disabled={event.isPast} />
               <div className="events-card__body">
                 {event.category ? <p className="events-card__eyebrow">{event.category}</p> : null}
                 <h3>{event.name}</h3>
                 <p className="events-card__start">
-                  <CalendarDays aria-hidden="true" /> Starts {startDateLabel(event)}
+                  <CalendarDays aria-hidden="true" />{" "}
+                  {event.isRecurring ? `Starts ${startDateLabel(event)}` : startDateLabel(event)}
                 </p>
                 {scheduleLabel(event) ? <p className="events-card__schedule">{scheduleLabel(event)}</p> : null}
                 <ul className="events-card__meta">
@@ -268,7 +375,13 @@ export function EventsBoard() {
                   {event.location ? (
                     <li>
                       <MapPin aria-hidden="true" />
-                      {event.location}
+                      {LOCATION_MAP_LINKS[event.location] ? (
+                        <a href={LOCATION_MAP_LINKS[event.location]} target="_blank" rel="noreferrer">
+                          {event.location}
+                        </a>
+                      ) : (
+                        event.location
+                      )}
                     </li>
                   ) : null}
                   {event.price ? (
@@ -278,11 +391,17 @@ export function EventsBoard() {
                     </li>
                   ) : null}
                 </ul>
-                {event.registrationLink ? (
+                {event.registrationLink && !event.isPast ? (
                   <div className="events-card__actions">
-                    <a className="button button--gold" href={event.registrationLink} target="_blank" rel="noreferrer">
-                      <ArrowUpRight aria-hidden="true" /> Register
-                    </a>
+                    {isPhoneNumber(event.registrationLink) ? (
+                      <a className="button button--gold" href={telHref(event.registrationLink)}>
+                        <Phone aria-hidden="true" /> Call {event.registrationLink}
+                      </a>
+                    ) : (
+                      <a className="button button--gold" href={event.registrationLink} target="_blank" rel="noreferrer">
+                        <ArrowUpRight aria-hidden="true" /> Register
+                      </a>
+                    )}
                   </div>
                 ) : null}
               </div>

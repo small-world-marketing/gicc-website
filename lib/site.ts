@@ -121,7 +121,7 @@ export const STATIC_ROUTES = [
   "/mfas-terms/",
   "/prayer-times/",
   "/programs/",
-  "/events/",
+  "/calendar/",
 ] as const;
 
 export const ORGANIZATION_JSON_LD = {

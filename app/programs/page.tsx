@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: "Programs and Events",
   description:
     "Browse and filter every upcoming GICC event, kept up to date by our team.",
-  alternates: { canonical: "/events/" },
+  alternates: { canonical: "/programs/" },
 };
 
 export default function ProgramsPage() {

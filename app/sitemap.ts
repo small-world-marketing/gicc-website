@@ -9,7 +9,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     url: new URL(route, SITE.url).toString(),
     lastModified,
     changeFrequency:
-      route === "/" || route === "/prayer-times/" || route === "/programs/" || route === "/events/"
+      route === "/" || route === "/prayer-times/" || route === "/programs/" || route === "/calendar/"
         ? "daily"
         : route === "/event-request/"
           ? "monthly"
@@ -17,7 +17,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority:
       route === "/"
         ? 1
-        : route === "/prayer-times/" || route === "/programs/" || route === "/events/"
+        : route === "/prayer-times/" || route === "/programs/" || route === "/calendar/"
           ? 0.9
           : route === "/event-request/"
             ? 0.8

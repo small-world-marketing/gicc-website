@@ -8,10 +8,7 @@ import {
   UsersRound,
 } from "lucide-react";
 import Link from "next/link";
-import { CommunityCalendar } from "@/components/CommunityCalendar";
 import { HomePrayerExperience } from "@/components/PrayerTimes";
-import { RegistrationsCarousel } from "@/components/RegistrationsCarousel";
-import { WeeklyProgramsSection } from "@/components/WeeklyProgramsSection";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
@@ -51,11 +48,6 @@ export default function HomePage() {
           </ul>
         </div>
       </section>
-
-      <WeeklyProgramsSection />
-
-      <RegistrationsCarousel />
-      <CommunityCalendar />
 
       <section id="booking" className="space-request-section" aria-labelledby="space-request-heading">
         <div className="shell section-space space-request-layout">

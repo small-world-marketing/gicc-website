@@ -21,9 +21,7 @@ export const SITE = {
 export const PRIMARY_NAV = [
   { label: "About", href: "/about/" },
   { label: "Programs", href: "/programs/" },
-  { label: "Registrations", href: "/programs/#registrations" },
-  { label: "Calendar", href: "/programs/#calendar" },
-  { label: "Events", href: "/events/" },
+  { label: "Calendar", href: "/calendar/" },
   { label: "Book", href: "/event-request/" },
   { label: "New Masjid", href: "/new-masjid/" },
   { label: "Contact", href: "/contact/" },

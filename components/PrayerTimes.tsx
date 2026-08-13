@@ -286,10 +286,10 @@ function PrayerTimesExperience({ showHero }: { showHero: boolean }) {
     { name: "Maghrib", arabic: "المغرب", Icon: Sunset, start: prayerTimes?.maghrib_azan, iqama: prayerTimes?.maghrib_iqamah },
     { name: "Isha", arabic: "العشاء", Icon: Moon, start: prayerTimes?.isha_azan, iqama: prayerTimes?.isha_iqamah },
   ];
-  const jummahs = [
-    { name: "Jummah 1", audience: "Brothers only", time: prayerTimes?.jumah_time_1 },
-    { name: "Jummah 2", audience: "Brothers & Sisters", time: prayerTimes?.jumah_time_2 },
-    { name: "Jummah 3", audience: "Brothers & Sisters", time: prayerTimes?.jumah_time_3 },
+  const jumuahs = [
+    { name: "Jumu'ah 1", audience: "Brothers only", time: prayerTimes?.jumah_time_1 },
+    { name: "Jumu'ah 2", audience: "Brothers & Sisters", time: prayerTimes?.jumah_time_2 },
+    { name: "Jumu'ah 3", audience: "Brothers & Sisters", time: prayerTimes?.jumah_time_3 },
   ];
 
   return (
@@ -299,7 +299,7 @@ function PrayerTimesExperience({ showHero }: { showHero: boolean }) {
           <MasjidBuildingPicture className="hero__media" alt="The Guildford neighbourhood that GICC serves in Surrey, BC" priority />
           <div className="hero__veil" aria-hidden="true" />
           <div className="hero__content">
-            <p className="hero__kicker">Assalamu alaikum, welcome.</p>
+            <p className="hero__kicker">As-Salaamu Alaykum, welcome.</p>
             <h1 id="home-heading">Guildford Islamic Cultural Center</h1>
             <p className="hero__lede">A spiritual home for daily prayer, Islamic learning, family programs, and community service in Guildford.</p>
             <div className="hero__actions">
@@ -309,7 +309,7 @@ function PrayerTimesExperience({ showHero }: { showHero: boolean }) {
           </div>
           <dl className="hero__status">
             <div><dt>Next Iqama</dt><dd>{nextIqama(prayerTimes, status)}</dd></div>
-            <div><dt>Jumuah</dt><dd>{formatPrayerTime(prayerTimes?.jumah_time_1)}</dd></div>
+            <div><dt>Jumu&apos;ah</dt><dd>{formatPrayerTime(prayerTimes?.jumah_time_1)}</dd></div>
             <div><dt>Calendar</dt><dd>Live</dd></div>
           </dl>
         </section>
@@ -345,11 +345,11 @@ function PrayerTimesExperience({ showHero }: { showHero: boolean }) {
             ))}
           </div>
 
-          <div className="jummah-heading"><span /><h3>Friday Jumu&apos;ah</h3><span /></div>
-          <div className="jummah-grid">
-            {jummahs.map(({ name, audience, time }) => (
-              <article className="jummah-card" key={name}>
-                <div className="jummah-card__top"><span lang="ar">الجمعة</span><i><MoonStar aria-hidden="true" /></i></div>
+          <div className="jumuah-heading"><span /><h3>Friday Jumu&apos;ah</h3><span /></div>
+          <div className="jumuah-grid">
+            {jumuahs.map(({ name, audience, time }) => (
+              <article className="jumuah-card" key={name}>
+                <div className="jumuah-card__top"><span lang="ar">الجمعة</span><i><MoonStar aria-hidden="true" /></i></div>
                 <h4>{name}</h4>
                 <p><UsersRound aria-hidden="true" /> {audience}</p>
                 <strong>{formatPrayerTime(time)}</strong>

@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 
 export default function HomePage() {
   const missionPoints = [
-    { icon: MoonStar, label: "Daily salah and Jumuah" },
+    { icon: MoonStar, label: "Daily salah and Jumu'ah" },
     { icon: BookOpen, label: "Madrasah and Quran programs" },
     { icon: UsersRound, label: "Youth and family support" },
     { icon: HandHeart, label: "New Islamic Center project" },

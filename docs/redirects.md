@@ -9,7 +9,7 @@ Cloudflare Pages redirects live in `public/_redirects`.
 | `/privacy-policy/` | `301 /privacy/` | Updated policy |
 | `/donation/` | `301 /donate/` | Duplicate donation page |
 | `/monthly-prayer-times/` | `301 /prayer-times/` | Consolidated live and monthly prayer page |
-| `/iqama-times/` | `301 /prayer-times/` | Consolidated Athan, Iqama, and Jumuah page |
+| `/iqama-times/` | `301 /prayer-times/` | Consolidated Athan, Iqama, and Jumu'ah page |
 | `/mfas/` | `302` to MFAS enrollment | Registration is hosted by MFAS/Jotform |
 | `/mfas-terms/` | Retained | Legal/program content |
 | `/new-masjid/` | Retained | Active campaign page |

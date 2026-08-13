@@ -8,7 +8,7 @@ brand
 
 The Muslim community of Guildford / Surrey, BC, and people discovering the masjid for the first time. Two audiences weighted roughly equally:
 
-- **Regulars (congregation):** return often, usually on mobile, for a fast answer — today's iqama times, Jumuah, what's on the calendar, a program registration link.
+- **Regulars (congregation):** return often, usually on mobile, for a fast answer — today's iqama times, Jumu'ah, what's on the calendar, a program registration link.
 - **Newcomers / visitors:** new to the area or to Islam, forming a first impression. They need orientation (who GICC is, where it is, what happens here) and an easy, low-pressure way to get involved or attend.
 
 The job to be done: "Tell me what I need to know about this masjid right now, and make me feel welcome doing it." A wide age range, so the interface has to stay legible and forgiving.

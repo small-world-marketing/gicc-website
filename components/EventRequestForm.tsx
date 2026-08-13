@@ -128,6 +128,14 @@ export function EventRequestForm() {
         payload && typeof payload === "object" && "reference" in payload && typeof payload.reference === "string"
           ? payload.reference
           : "GICC request";
+
+      if (formData.get("request_type") === "condolence") {
+        const thankYouUrl = new URL("/event-request/condolence-thank-you/", window.location.origin);
+        thankYouUrl.searchParams.set("reference", reference);
+        window.location.assign(thankYouUrl.toString());
+        return;
+      }
+
       setSubmitState({ status: "success", reference });
     } catch (error) {
       console.error("GICC event request submission failed", error);

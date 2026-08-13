@@ -35,7 +35,7 @@ The three published posts are expired event announcements or a privacy-sensitive
 
 | WordPress function | New source of truth |
 |---|---|
-| Athan, Iqama, and Jumuah times | Awqat feed on `/prayer-times/` and the homepage |
+| Athan, Iqama, and Jumu'ah times | Awqat feed on `/prayer-times/` and the homepage |
 | Monthly prayer table | Existing GICC monthly source in an accessible modal on `/prayer-times/` |
 | Program flyers and registration links | `REGISTRATIONS` in `lib/site.ts`, surfaced on `/programs/` |
 | Community schedule | Google Calendar feed on `/programs/` and the homepage |

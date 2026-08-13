@@ -18,12 +18,12 @@ export default function AboutPage() {
       <h2>From a weekly prayer to a community home</h2>
       <p>
         The need for a place of worship in Guildford became clear in 2008, when
-        local brothers began holding Jumu’ah at the Guildford Library. As the
+        local brothers began holding Jumu&apos;ah at the Guildford Library. As the
         community grew, volunteers secured a small musallah and later moved to
         the current centre on 103A Avenue in 2014.
       </p>
       <p>
-        Today, GICC hosts the five daily prayers, Jumu’ah, Qur’an and Islamic
+        Today, GICC hosts the five daily prayers, Jumu&apos;ah, Qur’an and Islamic
         studies, youth programs, family activities, and community support. Our
         congregation represents the many cultures and backgrounds that make
         Guildford and Surrey home.

@@ -6,6 +6,9 @@
 - Community calendar: Google Calendar `ammar@giccmasjid.org`, surfaced on the homepage's weekly programs snippet.
 - Events board: Google Sheet (see [Adding a new event](#adding-a-new-event)), posters on Google Drive, surfaced on `/programs/`.
 - Program registrations (outdated, kept in the codebase for reference — not actively maintained): `lib/site.ts` in this repo.
+- Prayer and Jumu'ah times: Awqat public feed, surfaced on `/prayer-times/` and the homepage.
+- Community calendar: Google Calendar `ammar@giccmasjid.org`, surfaced on `/programs/` and the homepage.
+- Program registrations: `lib/site.ts` in this repo.
 - Editorial and legal pages: route files under `app/`.
 - Public space requests: Cloudflare D1 and private R2 after production bindings are configured.
 

@@ -1,5 +1,13 @@
 # Decisions Log
 
+## 2026-07-29 — Give condolence requests a dedicated confirmation page
+
+**Context:** Condolence gathering requests previously ended on the generic space-request success state. The client requested a more considerate confirmation experience and a concise introduction to Muslim Funeral Aid Services.
+
+**Choice:** Redirect successful condolence submissions to `/event-request/condolence-thank-you/`, preserve the generated request reference in the URL, keep the page out of search results, and link MFAS information to its official website and GICC's local terms page. Other request types retain the existing confirmation state.
+
+**Consequences:** Families receive a clearer next-step message during a sensitive workflow without changing D1 storage, staff notifications, approval rules, or MFAS's role as the enrollment source of truth.
+
 ## 2026-07-22 — Stage the production hostname without moving authoritative DNS
 
 **Context:** GICC's authoritative DNS and mail remain on the current hosting provider. Moving nameservers without a complete zone export would risk the website, MX records, and other services during launch.

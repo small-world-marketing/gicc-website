@@ -1,4 +1,4 @@
-const EVENTS_SHEET_ID = "1HF4irsJiUbM5qnpWhWqjuuU7iRu_RQ3HNNCE4pMfJDw";
+const EVENTS_SHEET_ID = "1p33_LNs80WWptg6cfT0OxW2-C1Yvh1AXQcnTOoGQos8";
 const EVENTS_SHEET_URL = `https://docs.google.com/spreadsheets/d/${EVENTS_SHEET_ID}/gviz/tq?tqx=out:json`;
 
 type GvizCell = { v: unknown; f?: string } | null;

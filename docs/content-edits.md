@@ -16,12 +16,12 @@
 
 Everything on `/programs/` is pulled live from the GICC Events Google Sheet — nothing about adding an event requires a code change or pull request.
 
-1. Open the events sheet (`https://docs.google.com/spreadsheets/d/1HF4irsJiUbM5qnpWhWqjuuU7iRu_RQ3HNNCE4pMfJDw/edit`) and add a new row.
+1. Open the events sheet (`https://docs.google.com/spreadsheets/d/1p33_LNs80WWptg6cfT0OxW2-C1Yvh1AXQcnTOoGQos8/edit`) and add a new row.
 2. Fill in the required columns (marked with `*` in the header): Event Name, Category, Audience, Start Date, Days, Recurrence, Location, Price.
    - `Recurrence` — set this to `One-time` for a single event, even if `Days` is also filled in just to note which day it falls on. The site uses `Recurrence`, not `Days`, to decide whether an event repeats; leaving it as anything other than `One-time` (e.g. `Weekly`) makes it a recurring event.
    - `Category` / `Audience` — combine multiple values with `&` (e.g. `Religious & Academic`), and the site automatically splits them into separate filter buttons.
    - `End Date` — leave blank for a one-time event or an open-ended recurring one; fill it in for anything with a known end (a session, a multi-day event).
-3. Poster (optional) — upload the flyer to Google Drive (`https://drive.google.com/drive/folders/1LI5WN6gPsgsURE4lX4vPbb3pGUnhWcqC?usp=sharing`), set sharing to "Anyone with the link can view," and paste that share link into `Poster Link`.
+3. Poster (optional) — upload the flyer to Google Drive (`https://drive.google.com/drive/folders/1GmjIfIRt8v8eEWaQso2R5SCfihovVFen?usp=sharing`), set sharing to "Anyone with the link can view," and paste that share link into `Poster Link`.
 4. Registration (optional) — paste a registration URL, or a phone number if people should call in; the site automatically renders phone numbers as tap-to-call links.
 5. Changes show up on the live site within a few minutes — the sheet is fetched fresh on each page load, not cached in this repo.
 

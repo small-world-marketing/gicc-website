@@ -4,6 +4,16 @@ function errorResponse(status: number) {
   return new Response(null, { status, headers: { "Cache-Control": "no-store" } });
 }
 
+function isTrustedReferer(request: Request, url: URL): boolean {
+  const referer = request.headers.get("Referer");
+  if (!referer) return false;
+  try {
+    return new URL(referer).origin === url.origin;
+  } catch {
+    return false;
+  }
+}
+
 async function fetchDriveImage(id: string, signal: AbortSignal) {
   const upstream = await fetch(`https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w480`, {
     redirect: "follow",
@@ -18,6 +28,8 @@ async function fetchDriveImage(id: string, signal: AbortSignal) {
 
 export const onRequestGet = async ({ request }: { request: Request }) => {
   const url = new URL(request.url);
+  if (!isTrustedReferer(request, url)) return errorResponse(403);
+
   const id = url.searchParams.get("id") ?? "";
   if (!ID_PATTERN.test(id)) return errorResponse(400);
 

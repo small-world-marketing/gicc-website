@@ -159,9 +159,9 @@ function driveFileId(url: string): string | null {
   return queryMatch ? queryMatch[1] : null;
 }
 
-function posterProxySrc(posterLink: string) {
+function posterProxySrc(posterLink: string): string | null {
   const fileId = driveFileId(posterLink);
-  return fileId ? `/api/poster?id=${encodeURIComponent(fileId)}` : posterLink;
+  return fileId ? `/api/poster?id=${encodeURIComponent(fileId)}` : null;
 }
 
 function PosterThumbnail({
@@ -175,8 +175,9 @@ function PosterThumbnail({
 }) {
   const [failed, setFailed] = useState(false);
   const safePosterLink = posterLink && isSafeHttpUrl(posterLink) ? posterLink : undefined;
+  const proxySrc = safePosterLink ? posterProxySrc(safePosterLink) : null;
 
-  if (!safePosterLink || failed) {
+  if (!safePosterLink || !proxySrc || failed) {
     return (
       <div className="events-card__poster events-card__poster--empty">
         <span>No poster available</span>
@@ -187,7 +188,7 @@ function PosterThumbnail({
   if (disabled) {
     return (
       <div className="events-card__poster" aria-label={`Poster for ${name}`}>
-        <img src={posterProxySrc(safePosterLink)} alt="" loading="lazy" onError={() => setFailed(true)} />
+        <img src={proxySrc} alt="" loading="lazy" onError={() => setFailed(true)} />
       </div>
     );
   }
@@ -200,7 +201,7 @@ function PosterThumbnail({
       rel="noreferrer"
       aria-label={`View poster for ${name}`}
     >
-      <img src={posterProxySrc(safePosterLink)} alt="" loading="lazy" onError={() => setFailed(true)} />
+      <img src={proxySrc} alt="" loading="lazy" onError={() => setFailed(true)} />
     </a>
   );
 }

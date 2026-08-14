@@ -5,8 +5,8 @@ export type SheetEvent = {
   ageRange: string;
   startDate: string;
   endDate?: string;
-  startTime: string;
-  endTime: string;
+  startTime?: string;
+  endTime?: string;
   days: string;
   recurrence: string;
   location: string;

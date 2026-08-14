@@ -30,8 +30,15 @@ const dateFormatter = new Intl.DateTimeFormat("en-CA", {
   year: "numeric",
 });
 
+const todayKeyFormatter = new Intl.DateTimeFormat("en-CA", {
+  timeZone: VANCOUVER_TIME_ZONE,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
 function deriveEvents(events: SheetEvent[]): DerivedEvent[] {
-  const todayKey = new Date().toISOString().slice(0, 10);
+  const todayKey = todayKeyFormatter.format(new Date());
   const todayValue = Date.parse(`${todayKey}T00:00:00.000Z`);
 
   return events
@@ -61,7 +68,8 @@ function deriveEvents(events: SheetEvent[]): DerivedEvent[] {
       if (a.isPast !== b.isPast) return a.isPast ? 1 : -1;
       if (a.isPast) return b.endValue - a.endValue || a.name.localeCompare(b.name);
       if (a.hasStarted !== b.hasStarted) return a.hasStarted ? 1 : -1;
-      return b.startValue - a.startValue || a.name.localeCompare(b.name);
+      if (a.hasStarted) return b.startValue - a.startValue || a.name.localeCompare(b.name);
+      return a.startValue - b.startValue || a.name.localeCompare(b.name);
     });
 }
 
@@ -124,6 +132,15 @@ function telHref(value: string) {
   return `tel:${value.replace(/[^\d+]/g, "")}`;
 }
 
+function isSafeHttpUrl(value: string): boolean {
+  try {
+    const protocol = new URL(value.trim()).protocol;
+    return protocol === "http:" || protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 const LOCATION_MAP_LINKS: Record<string, string> = {
   "GICC Youth Center": "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent("14888 104 Avenue, Surrey, BC"),
   "Guildford Islamic Cultural Center":
@@ -157,8 +174,9 @@ function PosterThumbnail({
   disabled?: boolean;
 }) {
   const [failed, setFailed] = useState(false);
+  const safePosterLink = posterLink && isSafeHttpUrl(posterLink) ? posterLink : undefined;
 
-  if (!posterLink || failed) {
+  if (!safePosterLink || failed) {
     return (
       <div className="events-card__poster events-card__poster--empty">
         <span>No poster available</span>
@@ -169,7 +187,7 @@ function PosterThumbnail({
   if (disabled) {
     return (
       <div className="events-card__poster" aria-label={`Poster for ${name}`}>
-        <img src={posterProxySrc(posterLink)} alt="" loading="lazy" onError={() => setFailed(true)} />
+        <img src={posterProxySrc(safePosterLink)} alt="" loading="lazy" onError={() => setFailed(true)} />
       </div>
     );
   }
@@ -177,12 +195,12 @@ function PosterThumbnail({
   return (
     <a
       className="events-card__poster"
-      href={posterLink}
+      href={safePosterLink}
       target="_blank"
       rel="noreferrer"
       aria-label={`View poster for ${name}`}
     >
-      <img src={posterProxySrc(posterLink)} alt="" loading="lazy" onError={() => setFailed(true)} />
+      <img src={posterProxySrc(safePosterLink)} alt="" loading="lazy" onError={() => setFailed(true)} />
     </a>
   );
 }
@@ -288,14 +306,14 @@ export function EventsBoard() {
               Clear filters ({activeFilterCount})
             </button>
           ) : null}
-          <button
-            type="button"
-            className="text-link events-toggle-past"
-            aria-pressed={showPast}
-            onClick={() => setShowPast((previous) => !previous)}
-          >
-            {showPast ? "Hide past events" : `Show past events${pastEventCount > 0 ? ` (${pastEventCount})` : ""}`}
-          </button>
+          <label className="events-toggle-past">
+            <input
+              type="checkbox"
+              checked={showPast}
+              onChange={() => setShowPast((previous) => !previous)}
+            />
+            Show past events{pastEventCount > 0 ? ` (${pastEventCount})` : ""}
+          </label>
         </div>
 
         <div className="events-filter-bar" aria-label="Filter events">
@@ -391,17 +409,17 @@ export function EventsBoard() {
                     </li>
                   ) : null}
                 </ul>
-                {event.registrationLink && !event.isPast ? (
+                {event.registrationLink && !event.isPast && isPhoneNumber(event.registrationLink) ? (
                   <div className="events-card__actions">
-                    {isPhoneNumber(event.registrationLink) ? (
-                      <a className="button button--gold" href={telHref(event.registrationLink)}>
-                        <Phone aria-hidden="true" /> Call {event.registrationLink}
-                      </a>
-                    ) : (
-                      <a className="button button--gold" href={event.registrationLink} target="_blank" rel="noreferrer">
-                        <ArrowUpRight aria-hidden="true" /> Register
-                      </a>
-                    )}
+                    <a className="button button--gold" href={telHref(event.registrationLink)}>
+                      <Phone aria-hidden="true" /> Call {event.registrationLink}
+                    </a>
+                  </div>
+                ) : event.registrationLink && !event.isPast && isSafeHttpUrl(event.registrationLink) ? (
+                  <div className="events-card__actions">
+                    <a className="button button--gold" href={event.registrationLink} target="_blank" rel="noreferrer">
+                      <ArrowUpRight aria-hidden="true" /> Register
+                    </a>
                   </div>
                 ) : null}
               </div>

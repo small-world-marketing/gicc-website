@@ -99,10 +99,6 @@ export function CommunityCalendar() {
     <section id="calendar" className="calendar-section" aria-labelledby="calendar-heading">
       <div className="shell calendar-content">
         <div className="calendar-heading-row">
-          <div className="calendar-heading-copy">
-            <h2 id="calendar-heading">Community Calendar</h2>
-            <p>Upcoming programs and events at GICC, synced live from our community calendar.</p>
-          </div>
           <a className="button button--gold" href={SITE.calendarUrl} target="_blank" rel="noreferrer">
             <ArrowUpRight aria-hidden="true" /> Open Full Calendar
           </a>

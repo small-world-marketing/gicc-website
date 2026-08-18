@@ -22,8 +22,8 @@ export function SiteFooter() {
           <h2>Explore</h2>
           <nav className="footer-links" aria-label="Footer navigation">
             <Link href="/prayer-times/">Prayer &amp; Iqama Times</Link>
-            <Link href="/programs/">Programs &amp; Registrations</Link>
-            <Link href="/programs/#calendar">Community Calendar</Link>
+            <Link href="/programs/">Programs &amp; Events</Link>
+            <Link href="/calendar/">Community Calendar</Link>
             <Link href="/event-request/">Request GICC Space</Link>
           </nav>
         </div>

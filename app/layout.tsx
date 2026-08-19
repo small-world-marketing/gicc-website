@@ -9,6 +9,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { ORGANIZATION_JSON_LD, SITE } from "@/lib/site";
 import "./globals.css";
 import "./heading-case.css";
+import "./carousel-arrows.css";
 
 const displayFont = Cormorant({
   subsets: ["latin"],

@@ -1,0 +1,25 @@
+.carousel-arrow {
+  align-items: center;
+  background: #002a48;
+  border: 2px solid #fdd48d;
+  border-radius: 50%;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45), 0 0 0 2px rgba(0, 24, 46, 0.55);
+  color: #fdd48d;
+  display: inline-flex;
+  flex: 0 0 auto;
+  height: 56px;
+  justify-content: center;
+  width: 56px;
+}
+
+.carousel-arrow:hover {
+  background: #fdd48d;
+  border-color: #fdd48d;
+  color: #00182e;
+}
+
+.carousel-arrow svg {
+  height: 28px;
+  stroke-width: 2.6;
+  width: 28px;
+}

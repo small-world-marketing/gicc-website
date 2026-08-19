@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ContentPage } from "@/components/ContentPage";
+import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Donate to GICC",
@@ -15,6 +16,20 @@ export default function DonatePage() {
       lede="Your donation helps sustain the masjid today and build a permanent community home for generations to come."
       tone="dark"
     >
+      <h2>Donate by card</h2>
+      <p>
+        Give online with a credit or debit card through the New Islamic Center project site.
+      </p>
+      <p>
+        <a
+          className="button button--gold"
+          href={SITE.cardDonationUrl}
+          target="_blank"
+          rel="noreferrer"
+        >
+          Donate online
+        </a>
+      </p>
       <h2>Donate by e-Transfer</h2>
       <div className="donation-details">
         <p><strong>New Masjid Project</strong><br /><a href="mailto:newmasjid@giccmasjid.org">newmasjid@giccmasjid.org</a></p>

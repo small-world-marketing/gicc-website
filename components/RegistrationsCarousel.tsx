@@ -97,7 +97,7 @@ export function RegistrationsCarousel() {
 
         <div className="carousel-controls">
           <button className="carousel-arrow" type="button" onClick={() => move(-1)} aria-label="Previous registration">
-            <ChevronLeft aria-hidden="true" />
+            <ChevronLeft aria-hidden="true" size={28} strokeWidth={2.6} />
           </button>
           <div className="carousel-dots" role="group" aria-label="Choose a registration">
             {REGISTRATIONS.map((item, index) => (
@@ -113,7 +113,7 @@ export function RegistrationsCarousel() {
             ))}
           </div>
           <button className="carousel-arrow" type="button" onClick={() => move(1)} aria-label="Next registration">
-            <ChevronRight aria-hidden="true" />
+            <ChevronRight aria-hidden="true" size={28} strokeWidth={2.6} />
           </button>
         </div>
 

@@ -12,6 +12,7 @@ export const SITE = {
   mapsUrl:
     "https://www.google.com/maps/search/?api=1&query=15290%20103A%20Ave%20%23101%2C%20Surrey%2C%20BC%20V3R%207P8",
   donationUrl: "https://surreyislamiccenter.com/",
+  cardDonationUrl: "https://surreyislamiccenter.com/donate",
   awqatUrl: "https://www.awqat.net/masjid/masjid-guildford",
   monthlyPrayerUrl: "https://gicc.sash-group.com/monthly_prayer_times.aspx",
   calendarUrl:

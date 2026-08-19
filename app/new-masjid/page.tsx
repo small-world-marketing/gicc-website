@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { ContentPage } from "@/components/ContentPage";
 import { MasjidBuildingPicture } from "@/components/MasjidBuildingPicture";
+import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "New Masjid Project",
@@ -27,7 +27,14 @@ export default function NewMasjidPage() {
         support. Every contribution helps turn that vision into a sustainable
         institution for Guildford.
       </p>
-      <Link className="button button--navy" href="/donate/">Support the project</Link>
+      <a
+        className="button button--navy"
+        href={SITE.donationUrl}
+        target="_blank"
+        rel="noreferrer"
+      >
+        Support the project
+      </a>
     </ContentPage>
   );
 }

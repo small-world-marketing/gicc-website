@@ -2,76 +2,31 @@
 
 import { ArrowUpRight, CalendarDays, ExternalLink, MapPin, Phone, Tag, Users } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { fetchEvents, type SheetEvent } from "@/lib/events";
+import {
+  deriveEvents,
+  fetchEvents,
+  isPhoneNumber,
+  normalizeSafeHttpUrl,
+  posterImageSrc,
+  telHref,
+  type DerivedEvent,
+  type SheetEvent,
+} from "@/lib/events";
 
 type FilterDimension = "category" | "audience";
-
-type DerivedEvent = SheetEvent & {
-  isRecurring: boolean;
-  recurrenceLabel: string;
-  startValue: number;
-  hasStarted: boolean;
-  endValue: number;
-  isPast: boolean;
-};
 
 type EventsState = {
   status: "loading" | "ready" | "error";
   events: SheetEvent[];
 };
 
-const VANCOUVER_TIME_ZONE = "America/Vancouver";
-
 const dateFormatter = new Intl.DateTimeFormat("en-CA", {
-  timeZone: VANCOUVER_TIME_ZONE,
+  timeZone: "America/Vancouver",
   weekday: "short",
   month: "short",
   day: "numeric",
   year: "numeric",
 });
-
-const todayKeyFormatter = new Intl.DateTimeFormat("en-CA", {
-  timeZone: VANCOUVER_TIME_ZONE,
-  year: "numeric",
-  month: "2-digit",
-  day: "2-digit",
-});
-
-function deriveEvents(events: SheetEvent[]): DerivedEvent[] {
-  const todayKey = todayKeyFormatter.format(new Date());
-  const todayValue = Date.parse(`${todayKey}T00:00:00.000Z`);
-
-  return events
-    .map((event) => {
-      const startValue = Date.parse(`${event.startDate}T00:00:00.000Z`);
-      if (Number.isNaN(startValue)) return null;
-      const recurrenceText = event.recurrence.trim().toLowerCase();
-      const isRecurring = recurrenceText !== "" && recurrenceText !== "one-time";
-      const endValue = event.endDate
-        ? Date.parse(`${event.endDate}T00:00:00.000Z`)
-        : isRecurring
-          ? Number.POSITIVE_INFINITY
-          : startValue;
-      if (Number.isNaN(endValue)) return null;
-      return {
-        ...event,
-        isRecurring,
-        recurrenceLabel: event.recurrence || (isRecurring ? "Recurring" : "One-time"),
-        startValue,
-        hasStarted: startValue <= todayValue,
-        endValue,
-        isPast: endValue < todayValue,
-      };
-    })
-    .filter((event): event is DerivedEvent => event !== null)
-    .sort((a, b) => {
-      if (a.isPast !== b.isPast) return a.isPast ? 1 : -1;
-      if (a.isPast) return b.endValue - a.endValue || a.name.localeCompare(b.name);
-      if (a.hasStarted !== b.hasStarted) return a.hasStarted ? 1 : -1;
-      if (a.hasStarted) return b.startValue - a.startValue || a.name.localeCompare(b.name);
-      return a.startValue - b.startValue || a.name.localeCompare(b.name);
-    });
-}
 
 function startDateLabel(event: DerivedEvent) {
   return dateFormatter.format(new Date(`${event.startDate}T12:00:00.000Z`));
@@ -124,23 +79,6 @@ function priceLabel(price: string) {
   return /^\$0(\.0+)?$/.test(price.trim()) ? "Free" : price;
 }
 
-function isPhoneNumber(value: string) {
-  return /^\+?[\d\s().-]{7,}$/.test(value.trim());
-}
-
-function telHref(value: string) {
-  return `tel:${value.replace(/[^\d+]/g, "")}`;
-}
-
-function isSafeHttpUrl(value: string): boolean {
-  try {
-    const protocol = new URL(value.trim()).protocol;
-    return protocol === "http:" || protocol === "https:";
-  } catch {
-    return false;
-  }
-}
-
 const LOCATION_MAP_LINKS: Record<string, string> = {
   "GICC Youth Center": "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent("14888 104 Avenue, Surrey, BC"),
   "Guildford Islamic Cultural Center":
@@ -152,18 +90,6 @@ const LOCATION_MAP_LINKS: Record<string, string> = {
     "Hjorth Park": "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent("10275 148 St, Surrey, BC V3R 6S4"),
 };
 
-function driveFileId(url: string): string | null {
-  const pathMatch = url.match(/\/file\/d\/([^/]+)/);
-  if (pathMatch) return pathMatch[1];
-  const queryMatch = url.match(/[?&]id=([^&]+)/);
-  return queryMatch ? queryMatch[1] : null;
-}
-
-function posterProxySrc(posterLink: string): string | null {
-  const fileId = driveFileId(posterLink);
-  return fileId ? `/api/poster?id=${encodeURIComponent(fileId)}` : null;
-}
-
 function PosterThumbnail({
   name,
   posterLink,
@@ -174,8 +100,8 @@ function PosterThumbnail({
   disabled?: boolean;
 }) {
   const [failed, setFailed] = useState(false);
-  const safePosterLink = posterLink && isSafeHttpUrl(posterLink) ? posterLink : undefined;
-  const proxySrc = safePosterLink ? posterProxySrc(safePosterLink) : null;
+  const safePosterLink = posterLink ? normalizeSafeHttpUrl(posterLink) : null;
+  const proxySrc = posterImageSrc(posterLink);
 
   if (!safePosterLink || !proxySrc || failed) {
     return (
@@ -215,15 +141,19 @@ export function EventsBoard() {
   const [showPast, setShowPast] = useState(false);
 
   useEffect(() => {
-    const controller = new AbortController();
-    fetchEvents(controller.signal)
-      .then((events) => setState({ status: "ready", events }))
+    let cancelled = false;
+    fetchEvents()
+      .then((events) => {
+        if (!cancelled) setState({ status: "ready", events });
+      })
       .catch((error) => {
-        if (error instanceof DOMException && error.name === "AbortError") return;
+        if (cancelled) return;
         console.error("Unable to load the GICC events sheet", error);
         setState({ status: "error", events: [] });
       });
-    return () => controller.abort();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const derivedEvents = useMemo(() => deriveEvents(state.events), [state.events]);
@@ -368,7 +298,9 @@ export function EventsBoard() {
             </div>
           ) : null}
 
-          {filteredEvents.map((event, index) => (
+          {filteredEvents.map((event, index) => {
+            const registrationUrl = event.registrationLink ? normalizeSafeHttpUrl(event.registrationLink) : null;
+            return (
             <article
               className={event.isPast ? "events-card events-card--past" : "events-card"}
               aria-disabled={event.isPast || undefined}
@@ -416,16 +348,17 @@ export function EventsBoard() {
                       <Phone aria-hidden="true" /> Call {event.registrationLink}
                     </a>
                   </div>
-                ) : event.registrationLink && !event.isPast && isSafeHttpUrl(event.registrationLink) ? (
+                ) : registrationUrl && !event.isPast ? (
                   <div className="events-card__actions">
-                    <a className="button button--gold" href={event.registrationLink} target="_blank" rel="noreferrer">
+                    <a className="button button--gold" href={registrationUrl} target="_blank" rel="noreferrer">
                       <ArrowUpRight aria-hidden="true" /> Register
                     </a>
                   </div>
                 ) : null}
               </div>
             </article>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>

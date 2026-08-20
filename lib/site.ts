@@ -28,65 +28,6 @@ export const PRIMARY_NAV = [
   { label: "Contact", href: "/contact/" },
 ] as const;
 
-export const REGISTRATIONS = [
-  {
-    title: "Girls Who Lead",
-    meta: "Teen girls · Ages 13–18",
-    image: "/images/programs/optimized/girls-who-lead.webp",
-    thumbnail: "/images/programs/optimized/girls-who-lead-thumb.webp",
-    href: "https://tinyurl.com/giccdeendunya",
-  },
-  {
-    title: "Madrasah Grades 8-12",
-    meta: "Ibn Masood Madrasah",
-    image: "/images/programs/optimized/madrasah-grades-8-12.webp",
-    thumbnail: "/images/programs/optimized/madrasah-grades-8-12-thumb.webp",
-    href: "https://bit.ly/gicc-madrasah",
-  },
-  {
-    title: "Madrasah Grades 1-7",
-    meta: "Ibn Masood Madrasah",
-    image: "/images/programs/optimized/madrasah-grades-1-7.webp",
-    thumbnail: "/images/programs/optimized/madrasah-grades-1-7-thumb.webp",
-    href: "https://docs.google.com/forms/d/e/1FAIpQLScNVkR4Bhfh7dw_IIkpQpyNEkEododGvNDBDtOzytt4lbZpFw/viewform?vc=0&c=0&w=1&flr=0",
-  },
-  {
-    title: "GICC United 2026",
-    meta: "Soccer program",
-    image: "/images/programs/optimized/gicc-united-2026.webp",
-    thumbnail: "/images/programs/optimized/gicc-united-2026-thumb.webp",
-    href: "https://bit.ly/giccsoccer",
-  },
-  {
-    title: "Ibn Masood New Timings",
-    meta: "Madrasah registration",
-    image: "/images/programs/optimized/gicc-united-flyer-1.webp",
-    thumbnail: "/images/programs/optimized/gicc-united-flyer-1-thumb.webp",
-    href: "https://bit.ly/IbnMasood",
-  },
-  {
-    title: "Weekend Arabic Program",
-    meta: "Weekend classes",
-    image: "/images/programs/optimized/gicc-united-flyer-2.webp",
-    thumbnail: "/images/programs/optimized/gicc-united-flyer-2-thumb.webp",
-    href: "https://bit.ly/gicc-weekend",
-  },
-  {
-    title: "Ilm Essentials",
-    meta: "Foundations course",
-    image: "/images/programs/optimized/gicc-united-flyer-3.webp",
-    thumbnail: "/images/programs/optimized/gicc-united-flyer-3-thumb.webp",
-    href: "https://sites.google.com/view/ilm-essential-course/home",
-  },
-  {
-    title: "High School Madrasah",
-    meta: "Teen program",
-    image: "/images/programs/optimized/gicc-united-flyer-4.webp",
-    thumbnail: "/images/programs/optimized/gicc-united-flyer-4-thumb.webp",
-    href: "https://bit.ly/HS-Madrasah",
-  },
-] as const;
-
 export const LEGACY_ROUTES = [
   "/",
   "/about-us/",

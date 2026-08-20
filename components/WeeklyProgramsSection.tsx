@@ -111,7 +111,7 @@ export function WeeklyProgramsSection() {
       <div className="shell section-space">
         <div className="section-heading-row">
           <h2 id="programs-heading">Current programs, straight from the GICC calendar.</h2>
-          <a className="text-link" href="#calendar">
+          <a className="text-link" href="/calendar/">
             See all events <ArrowDown aria-hidden="true" />
           </a>
         </div>
@@ -145,7 +145,7 @@ export function WeeklyProgramsSection() {
                   {occurrence || calendar.status === "loading" ? (
                     <span><Clock aria-hidden="true" /> {schedule.time}</span>
                   ) : (
-                    <a href="#calendar"><CalendarDays aria-hidden="true" /> {schedule.time}</a>
+                    <a href="/calendar/"><CalendarDays aria-hidden="true" /> {schedule.time}</a>
                   )}
                 </div>
               </article>

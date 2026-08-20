@@ -57,11 +57,23 @@ export function SiteHeader() {
             className={`primary-nav${open ? " primary-nav--open" : ""}`}
             aria-label="Primary navigation"
           >
-            {PRIMARY_NAV.map((item) => (
-              <Link key={item.href} href={item.href} onClick={() => setOpen(false)}>
-                {item.label}
-              </Link>
-            ))}
+            {PRIMARY_NAV.map((item) =>
+              "external" in item && item.external ? (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={() => setOpen(false)}
+                >
+                  {item.label}
+                </a>
+              ) : (
+                <Link key={item.href} href={item.href} onClick={() => setOpen(false)}>
+                  {item.label}
+                </Link>
+              ),
+            )}
             <Link className="nav-donate" href="/donate/" onClick={() => setOpen(false)}>
               <HeartHandshake aria-hidden="true" /> Donate
             </Link>

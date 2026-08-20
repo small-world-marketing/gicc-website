@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { ArrowUpRight, Check, HeartHandshake } from "lucide-react";
+import { SITE } from "@/lib/site";
 import styles from "./MfasProgramSection.module.css";
 
 const MFAS_ENROLLMENT_URL = "https://muslimfas.ca/forms/";
-const MFAS_WEBSITE_URL = "https://muslimfas.ca/";
+const MFAS_WEBSITE_URL = SITE.mfasUrl;
 
 export function MfasProgramSection() {
   return (

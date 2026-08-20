@@ -3921,7 +3921,8 @@ html {
 @media (max-width: 639px) {
   .welcome-section .section-space,
   .programs-section .section-space,
-  .space-request-section .section-space {
+  .space-request-section .section-space,
+  .registrations-section .section-space {
     padding-block: 64px;
   }
 

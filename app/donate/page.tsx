@@ -30,6 +30,20 @@ export default function DonatePage() {
           Donate online
         </a>
       </p>
+      <h2>PayPal</h2>
+      <p>
+        PayPal is available at checkout on the project donate page.
+      </p>
+      <p>
+        <a
+          className="button button--gold"
+          href={SITE.paypalDonationUrl}
+          target="_blank"
+          rel="noreferrer"
+        >
+          PayPal
+        </a>
+      </p>
       <h2>Donate by e-Transfer</h2>
       <div className="donation-details">
         <p><strong>New Masjid Project</strong><br /><a href="mailto:newmasjid@giccmasjid.org">newmasjid@giccmasjid.org</a></p>

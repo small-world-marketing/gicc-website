@@ -2,13 +2,76 @@
 
 import { ArrowUpRight, ChevronLeft, ChevronRight, MoonStar } from "lucide-react";
 import Image from "next/image";
-import { KeyboardEvent, useState } from "react";
-import { REGISTRATIONS } from "@/lib/site";
+import { KeyboardEvent, useEffect, useMemo, useState } from "react";
+import {
+  deriveEvents,
+  fetchEvents,
+  isPhoneNumber,
+  normalizeSafeHttpUrl,
+  posterImageSrc,
+  telHref,
+  type SheetEvent,
+} from "@/lib/events";
+
+type RegistrationItem = {
+  title: string;
+  meta: string;
+  thumbnail: string;
+  href: string;
+  isPhone: boolean;
+};
+
+type EventsState = {
+  status: "loading" | "ready" | "error";
+  events: SheetEvent[];
+};
+
+function registrationMeta(event: SheetEvent): string {
+  const audience = [event.audience, event.ageRange ? `Ages ${event.ageRange}` : null].filter(Boolean).join(" · ");
+  return audience || event.category || event.location;
+}
+
+function toRegistrationItem(event: SheetEvent): RegistrationItem | null {
+  if (!event.registrationLink) return null;
+  const thumbnail = posterImageSrc(event.posterLink);
+  if (!thumbnail) return null;
+
+  const isPhone = isPhoneNumber(event.registrationLink);
+  const href = isPhone ? telHref(event.registrationLink) : normalizeSafeHttpUrl(event.registrationLink);
+  if (!href) return null;
+
+  return { title: event.name, meta: registrationMeta(event), thumbnail, href, isPhone };
+}
 
 export function RegistrationsCarousel() {
+  const [state, setState] = useState<EventsState>({ status: "loading", events: [] });
   const [activeIndex, setActiveIndex] = useState(0);
-  const active = REGISTRATIONS[activeIndex];
-  const count = REGISTRATIONS.length;
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchEvents()
+      .then((events) => {
+        if (!cancelled) setState({ status: "ready", events });
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        console.error("Unable to load the GICC events sheet", error);
+        setState({ status: "error", events: [] });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const registrations = useMemo(() => {
+    const upcoming = deriveEvents(state.events).filter((event) => !event.isPast);
+    return upcoming
+      .map(toRegistrationItem)
+      .filter((item): item is RegistrationItem => item !== null);
+  }, [state.events]);
+
+  const count = registrations.length;
+  const active = count > 0 ? registrations[activeIndex % count] : null;
 
   const move = (direction: number) => {
     setActiveIndex((current) => (current + direction + count) % count);
@@ -34,6 +97,9 @@ export function RegistrationsCarousel() {
     }
   };
 
+  if (state.status === "loading") return null;
+  if (state.status === "error" || count === 0 || !active) return null;
+
   return (
     <section id="registrations" className="registrations-section" aria-labelledby="registrations-heading">
       <div className="shell section-space registrations-layout">
@@ -58,7 +124,7 @@ export function RegistrationsCarousel() {
           aria-describedby="registration-carousel-instructions"
           onKeyDown={onStageKeyDown}
         >
-          {REGISTRATIONS.map((item, index) => {
+          {registrations.map((item, index) => {
             const offset = offsetOf(index);
             const distance = Math.abs(offset);
             const isActive = offset === 0;
@@ -100,7 +166,7 @@ export function RegistrationsCarousel() {
             <ChevronLeft aria-hidden="true" size={28} strokeWidth={2.6} />
           </button>
           <div className="carousel-dots" role="group" aria-label="Choose a registration">
-            {REGISTRATIONS.map((item, index) => (
+            {registrations.map((item, index) => (
               <button
                 key={item.title}
                 type="button"

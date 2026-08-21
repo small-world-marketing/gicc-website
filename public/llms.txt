@@ -5,7 +5,7 @@ GICC is a mosque and community centre serving Guildford and Surrey, British Colu
 Canonical site: https://www.giccmasjid.org/
 Prayer times: https://www.giccmasjid.org/prayer-times/
 Programs: https://www.giccmasjid.org/programs/
-Community calendar: https://www.giccmasjid.org/programs/#calendar
+Community calendar: https://www.giccmasjid.org/calendar/
 Request GICC space: https://www.giccmasjid.org/event-request/
 Contact: https://www.giccmasjid.org/contact/
 Donate: https://www.giccmasjid.org/donate/

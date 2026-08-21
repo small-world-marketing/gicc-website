@@ -303,7 +303,7 @@ function PrayerTimesExperience({ showHero }: { showHero: boolean }) {
             <h1 id="home-heading">Guildford Islamic Cultural Center</h1>
             <p className="hero__lede">A spiritual home for daily prayer, Islamic learning, family programs, and community service in Guildford.</p>
             <div className="hero__actions">
-              <a className="button button--gold" href="#calendar"><CalendarDays aria-hidden="true" /> View weekly events</a>
+              <a className="button button--gold" href="/calendar/"><CalendarDays aria-hidden="true" /> View weekly events</a>
               <a className="button button--blue" href="https://surreyislamiccenter.com/" target="_blank" rel="noreferrer"><Building2 aria-hidden="true" /> New Islamic Center</a>
             </div>
           </div>

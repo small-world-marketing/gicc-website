@@ -2,15 +2,14 @@ import type { Metadata } from "next";
 import { CommunityCalendar } from "@/components/CommunityCalendar";
 import { MfasProgramSection } from "@/components/MfasProgramSection";
 
-
 export const metadata: Metadata = {
-  title: "Programs and Registrations",
+  title: "Community Calendar",
   description:
-    "Explore GICC weekly programs, current registrations, Muslim Funeral Aid Services, and upcoming community events in Guildford, Surrey.",
-  alternates: { canonical: "/programs/" },
+    "Upcoming programs and events at GICC, synced live from our community calendar.",
+  alternates: { canonical: "/calendar/" },
 };
 
-export default function ProgramsPage() {
+export default function CalendarPage() {
   return (
     <>
       <header className="content-hero content-hero--dark interior-hero">

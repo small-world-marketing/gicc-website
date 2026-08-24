@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { CommunityCalendar } from "@/components/CommunityCalendar";
-import { MfasProgramSection } from "@/components/MfasProgramSection";
 
 export const metadata: Metadata = {
   title: "Community Calendar",
@@ -22,7 +21,6 @@ export default function CalendarPage() {
         </div>
       </header>
       <CommunityCalendar />
-      <MfasProgramSection />
     </>
   );
 }

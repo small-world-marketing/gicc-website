@@ -8,6 +8,7 @@ import {
   UsersRound,
 } from "lucide-react";
 import Link from "next/link";
+import { MfasProgramSection } from "@/components/MfasProgramSection";
 import { HomePrayerExperience } from "@/components/PrayerTimes";
 import { RegistrationsCarousel } from "@/components/RegistrationsCarousel";
 
@@ -29,6 +30,8 @@ export default function HomePage() {
     <>
       <HomePrayerExperience />
 
+      <RegistrationsCarousel />
+
       <section id="welcome" className="welcome-section" aria-labelledby="welcome-heading">
         <div className="shell section-space welcome-layout">
           <div className="welcome-copy">
@@ -49,8 +52,6 @@ export default function HomePage() {
           </ul>
         </div>
       </section>
-
-      <RegistrationsCarousel />
 
       <section id="booking" className="space-request-section" aria-labelledby="space-request-heading">
         <div className="shell section-space space-request-layout">
@@ -74,6 +75,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <MfasProgramSection />
 
       <section id="new-center" className="new-center-section" aria-labelledby="new-center-heading">
         <div className="shell section-space new-center-layout">

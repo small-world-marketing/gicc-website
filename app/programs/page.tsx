@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import { EventsBoard } from "@/components/EventsBoard";
-import { MfasProgramSection } from "@/components/MfasProgramSection";
-import { RegistrationsCarousel } from "@/components/RegistrationsCarousel";
 
 export const metadata: Metadata = {
   title: "Programs and Events",
@@ -22,8 +20,6 @@ export default function ProgramsPage() {
           </p>
         </div>
       </header>
-      <MfasProgramSection />
-      <RegistrationsCarousel />
       <EventsBoard />
     </>
   );

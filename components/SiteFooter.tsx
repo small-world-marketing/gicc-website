@@ -33,7 +33,7 @@ export function SiteFooter() {
             <Link href="/about/">About GICC</Link>
             <Link href="/new-masjid/">New Masjid Project</Link>
             <Link href="/youth-mental-health-support/">Youth Mental Health Support</Link>
-            <Link href="/programs/#mfas">Muslim Funeral Aid (MFAS)</Link>
+            <a href={SITE.mfasUrl} target="_blank" rel="noreferrer">Muslim Funeral Aid (MFAS)</a>
             <Link href="/donate/">Donate</Link>
             <Link href="/contact/">Contact Us</Link>
           </nav>

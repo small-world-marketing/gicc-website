@@ -1,14 +1,9 @@
-const LEGACY_ORIGIN = "https://www.giccmasjid.org";
-const LEGACY_RESOLVE_OVERRIDE = "giccmasjid.org";
+const LEGACY_ORIGIN = "https://legacy-origin.giccmasjid.org";
 const PRIVATE_PATH_SEGMENTS = new Set(["error_log", "process_logs"]);
 
 type PagesContext = {
   request: Request;
   params: { path?: string | string[] };
-};
-
-type CloudflareRequestInit = RequestInit & {
-  cf: { resolveOverride: string };
 };
 
 function unavailableResponse() {
@@ -45,12 +40,11 @@ export const onRequest = async ({ request, params }: PagesContext) => {
   headers.delete("Host");
   headers.delete("Content-Length");
 
-  const init: CloudflareRequestInit = {
+  const init: RequestInit = {
     method: request.method,
     headers,
     redirect: "manual",
     signal: request.signal,
-    cf: { resolveOverride: LEGACY_RESOLVE_OVERRIDE },
   };
   if (request.method !== "GET" && request.method !== "HEAD") init.body = request.body;
 

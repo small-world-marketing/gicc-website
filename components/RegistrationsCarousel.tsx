@@ -19,6 +19,7 @@ type RegistrationItem = {
   thumbnail: string;
   href: string;
   isPhone: boolean;
+  programNames: string[];
 };
 
 type EventsState = {
@@ -40,7 +41,24 @@ function toRegistrationItem(event: SheetEvent): RegistrationItem | null {
   const href = isPhone ? telHref(event.registrationLink) : normalizeSafeHttpUrl(event.registrationLink);
   if (!href) return null;
 
-  return { title: event.name, meta: registrationMeta(event), thumbnail, href, isPhone };
+  return { title: event.name, meta: registrationMeta(event), thumbnail, href, isPhone, programNames: [event.name] };
+}
+
+function uniqueRegistrations(items: RegistrationItem[]): RegistrationItem[] {
+  const byPosterAndDestination = new Map<string, RegistrationItem>();
+
+  for (const item of items) {
+    const key = `${item.thumbnail}\u0000${item.href}`;
+    const existing = byPosterAndDestination.get(key);
+    if (!existing) {
+      byPosterAndDestination.set(key, item);
+      continue;
+    }
+
+    if (!existing.programNames.includes(item.title)) existing.programNames.push(item.title);
+  }
+
+  return [...byPosterAndDestination.values()];
 }
 
 export function RegistrationsCarousel() {
@@ -65,9 +83,9 @@ export function RegistrationsCarousel() {
 
   const registrations = useMemo(() => {
     const upcoming = deriveEvents(state.events).filter((event) => !event.isPast);
-    return upcoming
+    return uniqueRegistrations(upcoming
       .map(toRegistrationItem)
-      .filter((item): item is RegistrationItem => item !== null);
+      .filter((item): item is RegistrationItem => item !== null));
   }, [state.events]);
 
   const count = registrations.length;
@@ -133,9 +151,9 @@ export function RegistrationsCarousel() {
               <button
                 className="registration-card"
                 data-offset={offset}
-                key={item.title}
+                key={`${item.thumbnail}\u0000${item.href}`}
                 type="button"
-                aria-label={isActive ? `${item.title}, selected` : `Show ${item.title}`}
+                aria-label={isActive ? `${item.programNames.join(", ")}, selected` : `Show ${item.programNames.join(", ")}`}
                 aria-pressed={isActive}
                 aria-hidden={distance > 1 ? "true" : undefined}
                 tabIndex={distance <= 1 ? 0 : -1}
@@ -150,7 +168,7 @@ export function RegistrationsCarousel() {
               >
                 <Image
                   src={item.thumbnail}
-                  alt={isActive ? `${item.title} — ${item.meta}` : ""}
+                  alt={isActive ? `${item.programNames.join(", ")} — ${item.meta}` : ""}
                   fill
                   sizes="(max-width: 639px) 224px, (max-width: 1039px) 296px, 336px"
                   loading={index === 0 ? "eager" : "lazy"}
@@ -168,9 +186,9 @@ export function RegistrationsCarousel() {
           <div className="carousel-dots" role="group" aria-label="Choose a registration">
             {registrations.map((item, index) => (
               <button
-                key={item.title}
+                key={`${item.thumbnail}\u0000${item.href}`}
                 type="button"
-                aria-label={`Show ${item.title}`}
+                aria-label={`Show ${item.programNames.join(", ")}`}
                 aria-pressed={index === activeIndex}
                 onClick={() => goTo(index)}
               >
@@ -184,8 +202,8 @@ export function RegistrationsCarousel() {
         </div>
 
         <div className="registration-caption" aria-live="polite">
-          <h3>{active.title}</h3>
-          <p>{active.meta}</p>
+          <h3>{active.programNames.length === 1 ? active.title : "Related programs"}</h3>
+          <p>{active.programNames.length === 1 ? active.meta : active.programNames.join(" · ")}</p>
           <a className="button button--gold" href={active.href} target="_blank" rel="noreferrer">
             <ArrowUpRight aria-hidden="true" /> Register now
           </a>

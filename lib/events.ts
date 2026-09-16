@@ -134,9 +134,14 @@ function driveFileId(url: string): string | null {
   return queryMatch ? queryMatch[1] : null;
 }
 
+const LOCAL_POSTER_ASSETS: Record<string, string> = {
+  "1m2kI7hnPOKYd1qxirNZfXP9ttpTyB-o5": "/images/programs/boys-to-men.jpeg",
+};
+
 export function posterProxySrc(normalizedPosterLink: string): string | null {
   const fileId = driveFileId(normalizedPosterLink);
-  return fileId ? `/api/poster?id=${encodeURIComponent(fileId)}` : null;
+  if (!fileId) return null;
+  return LOCAL_POSTER_ASSETS[fileId] ?? `/api/poster?id=${encodeURIComponent(fileId)}`;
 }
 
 export function posterImageSrc(posterLink?: string): string | null {

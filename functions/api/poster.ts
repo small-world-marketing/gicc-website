@@ -15,15 +15,28 @@ function isTrustedReferer(request: Request, url: URL): boolean {
 }
 
 async function fetchDriveImage(id: string, signal: AbortSignal) {
-  const upstream = await fetch(`https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w480`, {
-    redirect: "follow",
-    signal,
-  });
-  const contentType = upstream.headers.get("content-type") ?? "";
-  if (!upstream.ok || !contentType.startsWith("image/")) {
-    throw new Error(`Drive thumbnail request failed with status ${upstream.status} (${contentType})`);
+  const encodedId = encodeURIComponent(id);
+  const sources = [
+    `https://drive.google.com/thumbnail?id=${encodedId}&sz=w480`,
+    `https://lh3.googleusercontent.com/d/${encodedId}=w480`,
+  ];
+  const failures: string[] = [];
+
+  for (const source of sources) {
+    try {
+      const upstream = await fetch(source, { redirect: "follow", signal });
+      const contentType = upstream.headers.get("content-type") ?? "";
+      if (upstream.ok && contentType.startsWith("image/")) {
+        return { body: await upstream.arrayBuffer(), contentType };
+      }
+      failures.push(`${upstream.status} (${contentType || "unknown content type"})`);
+    } catch (error) {
+      if (signal.aborted) throw error;
+      failures.push(error instanceof Error ? error.message : "unknown fetch error");
+    }
   }
-  return { body: await upstream.arrayBuffer(), contentType };
+
+  throw new Error(`Drive thumbnail requests failed: ${failures.join("; ")}`);
 }
 
 export const onRequestGet = async ({ request }: { request: Request }) => {

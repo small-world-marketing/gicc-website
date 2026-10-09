@@ -3,7 +3,7 @@
 import { ArrowLeft, ArrowRight, CheckCircle2, FileUp, LoaderCircle } from "lucide-react";
 import Link from "next/link";
 import Script from "next/script";
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { getAttributionPayload } from "@/lib/attribution";
 import { SITE } from "@/lib/site";
 
@@ -16,6 +16,14 @@ type SubmitState =
   | { status: "submitting" }
   | { status: "success"; reference: string }
   | { status: "error"; message: string };
+
+function subscribeToNothing() {
+  return () => {};
+}
+
+function emptyDate() {
+  return "";
+}
 
 function vancouverToday() {
   const parts = new Intl.DateTimeFormat("en-CA", {
@@ -39,7 +47,9 @@ export function EventRequestForm() {
   const [chargesFees, setChargesFees] = useState("no");
   const [fileError, setFileError] = useState("");
   const [submitState, setSubmitState] = useState<SubmitState>({ status: "idle" });
-  const [minDate] = useState(vancouverToday);
+  // The page is statically exported, so a date computed during the server render is frozen at the build date
+  // and hydration keeps it. The server snapshot is empty; the browser re-renders with today's Vancouver date.
+  const minDate = useSyncExternalStore(subscribeToNothing, vancouverToday, emptyDate);
   const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? DEFAULT_TURNSTILE_SITE_KEY;
 
   useEffect(() => {

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { ContentPage } from "@/components/ContentPage";
-import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
@@ -55,7 +54,7 @@ export default function PrivacyPage() {
       <h2>Your choices and questions</h2>
       <p>
         To ask about, correct, or request deletion of information you submitted,
-        email <a href={`mailto:${SITE.email}`}>{SITE.email}</a>. GICC may retain
+        {" "}<a href="/contact/">contact GICC</a>. GICC may retain
         information where required for legal, safety, fraud-prevention, or
         operational record-keeping purposes.
       </p>

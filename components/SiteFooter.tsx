@@ -14,7 +14,7 @@ export function SiteFooter() {
           <h2>Contact</h2>
           <div className="footer-links">
             <a href={SITE.phoneHref}>{SITE.phoneDisplay}</a>
-            <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+            <Link href="/contact/">Contact GICC</Link>
             <a href={SITE.mapsUrl} target="_blank" rel="noreferrer">{SITE.addressLine}, Surrey, BC</a>
           </div>
         </div>

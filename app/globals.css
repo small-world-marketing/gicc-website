@@ -1502,21 +1502,27 @@ li {
   margin-bottom: 3rem;
 }
 
-.contact-methods > a {
+.contact-methods > :is(a, button) {
   align-items: flex-start;
+  background: transparent;
+  border: 0;
   border-top: 1px solid var(--line);
   color: var(--body) !important;
+  cursor: pointer;
   display: flex;
+  font: inherit;
   gap: 1rem;
   padding: 1.25rem 0;
+  text-align: left;
   text-decoration: none;
+  width: 100%;
 }
 
-.contact-methods > a:nth-child(odd) {
+.contact-methods > :is(a, button):nth-child(odd) {
   padding-right: 1.5rem;
 }
 
-.contact-methods > a:nth-child(even) {
+.contact-methods > :is(a, button):nth-child(even) {
   border-left: 1px solid var(--line);
   padding-left: 1.5rem;
 }
@@ -1533,6 +1539,16 @@ li {
   color: var(--navy);
   display: block;
   margin-bottom: 0.2rem;
+}
+
+.protected-email-inline {
+  background: transparent;
+  border: 0;
+  color: currentColor;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+  text-decoration: underline;
 }
 
 .donation-details {
@@ -2270,8 +2286,8 @@ li {
     grid-template-columns: 1fr;
   }
 
-  .contact-methods > a:nth-child(odd),
-  .contact-methods > a:nth-child(even) {
+  .contact-methods > :is(a, button):nth-child(odd),
+  .contact-methods > :is(a, button):nth-child(even) {
     border-left: 0;
     padding-inline: 0;
   }

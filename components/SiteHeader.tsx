@@ -28,7 +28,7 @@ export function SiteHeader() {
             <span className="utility-bar__address-short">Surrey, BC</span>
           </a>
           <a href={SITE.phoneHref}><Phone aria-hidden="true" /> {SITE.phoneDisplay}</a>
-          <a className="utility-bar__email" href={`mailto:${SITE.email}`}><Mail aria-hidden="true" /> {SITE.email}</a>
+          <Link className="utility-bar__email" href="/contact/"><Mail aria-hidden="true" /> Contact GICC</Link>
         </div>
       </div>
       <div className="nav-bar">

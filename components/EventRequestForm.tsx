@@ -4,8 +4,8 @@ import { ArrowLeft, ArrowRight, CheckCircle2, FileUp, LoaderCircle } from "lucid
 import Link from "next/link";
 import Script from "next/script";
 import { FormEvent, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { ProtectedEmail } from "@/components/ProtectedEmail";
 import { getAttributionPayload } from "@/lib/attribution";
-import { SITE } from "@/lib/site";
 
 const MAX_FILE_BYTES = 5 * 1024 * 1024;
 const ALLOWED_FILE_TYPES = ["application/pdf", "image/jpeg", "image/png"];
@@ -322,7 +322,7 @@ export function EventRequestForm() {
         {submitState.status === "error" ? (
           <div ref={errorRef} className="form-error" role="alert" tabIndex={-1}>
             <p>{submitState.message}</p>
-            <p>If the problem continues, email <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.</p>
+            <p>If the problem continues, email <ProtectedEmail kind="general" variant="inline" />.</p>
           </div>
         ) : null}
 

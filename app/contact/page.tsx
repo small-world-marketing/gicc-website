@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { Mail, MapPin, Phone } from "lucide-react";
+import { MapPin, Phone } from "lucide-react";
 import { ContentPage } from "@/components/ContentPage";
+import { ProtectedEmail } from "@/components/ProtectedEmail";
 import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -19,8 +20,8 @@ export default function ContactPage() {
     >
       <div className="contact-methods">
         <a href={SITE.phoneHref}><Phone aria-hidden="true" /><span><strong>Call us</strong>{SITE.phoneDisplay}</span></a>
-        <a href={`mailto:${SITE.email}`}><Mail aria-hidden="true" /><span><strong>General enquiries</strong>{SITE.email}</span></a>
-        <a href="mailto:imam@giccmasjid.org"><Mail aria-hidden="true" /><span><strong>Religious enquiries</strong>imam@giccmasjid.org</span></a>
+        <ProtectedEmail kind="general" label="General enquiries" />
+        <ProtectedEmail kind="religious" label="Religious enquiries" />
         <a href={SITE.mapsUrl} target="_blank" rel="noreferrer"><MapPin aria-hidden="true" /><span><strong>Visit GICC</strong>{SITE.addressLine}<br />{SITE.cityLine}</span></a>
       </div>
       <h2>Requesting space</h2>

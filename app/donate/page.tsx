@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ContentPage } from "@/components/ContentPage";
+import { ProtectedEmail } from "@/components/ProtectedEmail";
 import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -47,7 +48,7 @@ export default function DonatePage() {
       <h2>Donate by e-Transfer</h2>
       <div className="donation-details">
         <p><strong>New Masjid Project</strong><br /><a href="mailto:newmasjid@giccmasjid.org">newmasjid@giccmasjid.org</a></p>
-        <p><strong>Madrasah and centre expenses</strong><br /><a href="mailto:info@giccmasjid.org">info@giccmasjid.org</a></p>
+        <p><strong>Madrasah and centre expenses</strong><br /><ProtectedEmail kind="general" variant="inline" /></p>
       </div>
       <h2>Donate by bank wire</h2>
       <dl className="bank-details">
@@ -57,7 +58,7 @@ export default function DonatePage() {
         <div><dt>Account number</dt><dd>5011124</dd></div>
       </dl>
       <p>
-        For donation receipts or transfer questions, email <a href="mailto:info@giccmasjid.org">info@giccmasjid.org</a>.
+        For donation receipts or transfer questions, <a href="/contact/">contact GICC</a>.
       </p>
     </ContentPage>
   );

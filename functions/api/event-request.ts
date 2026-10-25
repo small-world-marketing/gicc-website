@@ -28,7 +28,7 @@ interface Env {
   TURNSTILE_SECRET_KEY?: string;
 }
 
-type EventContext = {
+type EventContext = { waitUntil?: (promise: Promise<unknown>) => void;
   request: Request & { cf?: Record<string, unknown> };
   env: Env;
 };
@@ -194,6 +194,19 @@ type CmsLeadMirror = {
   attribution?: Record<string, unknown>
 }
 
+function scheduleCmsMirror(waitUntil: ((promise: Promise<unknown>) => void) | undefined, task: Promise<void>): Promise<void> {
+  // Let the CMS copy finish after the response so it never delays the visitor.
+  if (typeof waitUntil === "function") {
+    try {
+      waitUntil(task);
+      return Promise.resolve();
+    } catch {
+      // fall back to awaiting below
+    }
+  }
+  return task;
+}
+
 async function mirrorLeadToCms(env: unknown, lead: CmsLeadMirror): Promise<void> {
   const vars = (env || {}) as Record<string, unknown>
   const url = typeof vars.CMS_LEAD_INGEST_URL === 'string' ? vars.CMS_LEAD_INGEST_URL.trim() : ''
@@ -227,7 +240,7 @@ async function mirrorLeadToCms(env: unknown, lead: CmsLeadMirror): Promise<void>
 }
 // ---------------------------------------------------------------------------
 
-export const onRequestPost = async ({ request, env }: EventContext) => {
+export const onRequestPost = async ({ request, env, waitUntil }: EventContext) => {
   const requestUrl = new URL(request.url);
   const origin = request.headers.get("Origin");
   if (origin && origin !== requestUrl.origin) return json({ error: "Cross-site submissions are not allowed." }, 403);
@@ -344,7 +357,7 @@ export const onRequestPost = async ({ request, env }: EventContext) => {
       "UPDATE event_requests SET notification_status = ?, notification_error = ? WHERE id = ?",
     ).bind(notification.status, notification.error.slice(0, 500) || null, id).run();
 
-    if (notification.status === "sent") await mirrorLeadToCms(env, { name: fields.full_name, phone: fields.phone, email: fields.email, service: `Event request: ${fields.request_type}`, details: [`Reference: ${reference}`, `Requested: ${fields.requested_date} ${fields.start_time} (${fields.duration_minutes} min)`, `Location: ${fields.location_preference}`, `Attendees: ${fields.attendees}, expected participants: ${fields.expected_participants}`, fields.recurrence && `Recurrence: ${fields.recurrence}`, `Fees charged: ${fields.fees_charged}${fields.fee_amount ? ` ($${fields.fee_amount})` : ""}`, "", fields.event_details].filter((line): line is string => typeof line === "string").join("\n"), requestId: reference });
+    if (notification.status === "sent") await scheduleCmsMirror(waitUntil, mirrorLeadToCms(env, { name: fields.full_name, phone: fields.phone, email: fields.email, service: `Event request: ${fields.request_type}`, details: [`Reference: ${reference}`, `Requested: ${fields.requested_date} ${fields.start_time} (${fields.duration_minutes} min)`, `Location: ${fields.location_preference}`, `Attendees: ${fields.attendees}, expected participants: ${fields.expected_participants}`, fields.recurrence && `Recurrence: ${fields.recurrence}`, `Fees charged: ${fields.fees_charged}${fields.fee_amount ? ` ($${fields.fee_amount})` : ""}`, "", fields.event_details].filter((line): line is string => typeof line === "string").join("\n"), requestId: reference }));
     console.info("event_request_received", { reference, notification: notification.status });
     return json({ reference }, 201);
   } catch (error) {

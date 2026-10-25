@@ -28,7 +28,7 @@ interface Env {
   TURNSTILE_SECRET_KEY?: string;
 }
 
-type EventContext = {
+type EventContext = { waitUntil?: (promise: Promise<unknown>) => void;
   request: Request & { cf?: Record<string, unknown> };
   env: Env;
 };
@@ -178,7 +178,69 @@ const sendNotification = async ({
   return { status: "sent" as const, error: "" };
 };
 
-export const onRequestPost = async ({ request, env }: EventContext) => {
+// --- CMS lead mirror (cms.smallworld.ca) -----------------------------------
+// Best-effort copy of a delivered lead into the SWM CMS. Runs only after the
+// email has been handed to MailerSend, times out after 4s and never throws,
+// so it can never block or change the email delivery or the form response.
+// Disabled unless CMS_LEAD_INGEST_URL and CMS_LEAD_TOKEN are set in Pages env.
+type CmsLeadMirror = {
+  name?: string
+  phone?: string
+  email?: string
+  service?: string
+  details?: string
+  requestId?: string
+  smsConsent?: boolean
+  attribution?: Record<string, unknown>
+}
+
+function scheduleCmsMirror(waitUntil: ((promise: Promise<unknown>) => void) | undefined, task: Promise<void>): Promise<void> {
+  // Let the CMS copy finish after the response so it never delays the visitor.
+  if (typeof waitUntil === "function") {
+    try {
+      waitUntil(task);
+      return Promise.resolve();
+    } catch {
+      // fall back to awaiting below
+    }
+  }
+  return task;
+}
+
+async function mirrorLeadToCms(env: unknown, lead: CmsLeadMirror): Promise<void> {
+  const vars = (env || {}) as Record<string, unknown>
+  const url = typeof vars.CMS_LEAD_INGEST_URL === 'string' ? vars.CMS_LEAD_INGEST_URL.trim() : ''
+  const rawToken = vars.CMS_LEAD_TOKEN || vars.PAYLOAD_BUILD_TOKEN
+  const token = typeof rawToken === 'string' ? rawToken.trim() : ''
+  if (!url || !token) return
+  const clip = (value: unknown, max: number) => (typeof value === 'string' ? value.trim().slice(0, max) : '')
+  const email = clip(lead.email, 254)
+  const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? email : ''
+  const body: Record<string, unknown> = {
+    name: clip(lead.name, 100) || validEmail.slice(0, 100) || '(not provided)',
+    phone: clip(lead.phone, 40) || '(not provided)',
+  }
+  if (validEmail) body.email = validEmail
+  if (clip(lead.service, 200)) body.service = clip(lead.service, 200)
+  if (clip(lead.details, 2000)) body.details = clip(lead.details, 2000)
+  if (clip(lead.requestId, 200)) body.requestId = clip(lead.requestId, 200)
+  if (typeof lead.smsConsent === 'boolean') body.smsConsent = lead.smsConsent
+  if (lead.attribution && typeof lead.attribution === 'object') body.attribution = lead.attribution
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(4000),
+    })
+    if (!response.ok) console.warn(JSON.stringify({ event: 'lead_cms_store_failed', requestId: body.requestId, status: response.status }))
+  } catch (error) {
+    console.warn(JSON.stringify({ event: 'lead_cms_store_failed', requestId: body.requestId, reason: error instanceof Error ? error.name : 'request_failed' }))
+  }
+}
+// ---------------------------------------------------------------------------
+
+export const onRequestPost = async ({ request, env, waitUntil }: EventContext) => {
   const requestUrl = new URL(request.url);
   const origin = request.headers.get("Origin");
   if (origin && origin !== requestUrl.origin) return json({ error: "Cross-site submissions are not allowed." }, 403);
@@ -295,6 +357,7 @@ export const onRequestPost = async ({ request, env }: EventContext) => {
       "UPDATE event_requests SET notification_status = ?, notification_error = ? WHERE id = ?",
     ).bind(notification.status, notification.error.slice(0, 500) || null, id).run();
 
+    if (notification.status === "sent") await scheduleCmsMirror(waitUntil, mirrorLeadToCms(env, { name: fields.full_name, phone: fields.phone, email: fields.email, service: `Event request: ${fields.request_type}`, details: [`Reference: ${reference}`, `Requested: ${fields.requested_date} ${fields.start_time} (${fields.duration_minutes} min)`, `Location: ${fields.location_preference}`, `Attendees: ${fields.attendees}, expected participants: ${fields.expected_participants}`, fields.recurrence && `Recurrence: ${fields.recurrence}`, `Fees charged: ${fields.fees_charged}${fields.fee_amount ? ` ($${fields.fee_amount})` : ""}`, "", fields.event_details].filter((line): line is string => typeof line === "string").join("\n"), requestId: reference }));
     console.info("event_request_received", { reference, notification: notification.status });
     return json({ reference }, 201);
   } catch (error) {

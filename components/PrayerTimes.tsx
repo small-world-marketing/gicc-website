@@ -16,27 +16,16 @@ import {
 import { createPortal } from "react-dom";
 import { type RefObject, useCallback, useEffect, useRef, useState } from "react";
 import { MasjidBuildingPicture } from "@/components/MasjidBuildingPicture";
+import {
+  bcDateString,
+  bcLongDate,
+  formatPrayerTime,
+  hijriDateParts,
+  nextIqama,
+  type PrayerStatus,
+  type PrayerTimesRecord,
+} from "@/lib/prayer-time";
 import { SITE } from "@/lib/site";
-
-export type PrayerTimesRecord = {
-  prayer_date: string;
-  fajr_azan: string | null;
-  sunrise: string | null;
-  dhuhr_azan: string | null;
-  asr_azan: string | null;
-  maghrib_azan: string | null;
-  isha_azan: string | null;
-  fajr_iqamah: string | null;
-  dhuhr_iqamah: string | null;
-  asr_iqamah: string | null;
-  maghrib_iqamah: string | null;
-  isha_iqamah: string | null;
-  jumah_time_1: string | null;
-  jumah_time_2: string | null;
-  jumah_time_3: string | null;
-};
-
-type PrayerStatus = "loading" | "ready" | "empty" | "error" | "unconfigured";
 
 const AWQAT_URL = process.env.NEXT_PUBLIC_AWQAT_SUPABASE_URL ?? "https://kjbutgbpddsadvnbgblg.supabase.co";
 const AWQAT_KEY =
@@ -45,97 +34,13 @@ const AWQAT_KEY =
 const AWQAT_MASJID_ID =
   process.env.NEXT_PUBLIC_AWQAT_MASJID_ID ?? "96ac3382-aef7-4710-a187-7002ba7f4323";
 
-function vancouverDateString(date = new Date()) {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/Vancouver",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(date);
-  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
-  return `${values.year}-${values.month}-${values.day}`;
-}
-
-function vancouverLongDate(date = new Date()) {
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/Vancouver",
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-  }).format(date);
-}
-
-function hijriDateParts(date = new Date()) {
-  try {
-    const parts = new Intl.DateTimeFormat("en-US-u-ca-islamic-umalqura", {
-      timeZone: "America/Vancouver",
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    }).formatToParts(date);
-    const get = (type: Intl.DateTimeFormatPartTypes) =>
-      parts.find((part) => part.type === type)?.value;
-    const day = get("day");
-    const month = get("month");
-    const year = get("year");
-    return day && month && year ? { label: `${day} ${month} ${year}`, era: "AH" } : null;
-  } catch {
-    return null;
-  }
-}
-
-function parsePrayerTime(value: string | null | undefined) {
-  const match = String(value ?? "").match(/(\d{1,2}):(\d{2})/);
-  if (!match) return null;
-  return { hours: Number(match[1]), minutes: Number(match[2]) };
-}
-
-function formatPrayerTime(value: string | null | undefined) {
-  const parsed = parsePrayerTime(value);
-  if (!parsed) return "-";
-  const period = parsed.hours >= 12 ? "PM" : "AM";
-  const hour = parsed.hours % 12 || 12;
-  return `${hour}:${String(parsed.minutes).padStart(2, "0")} ${period}`;
-}
-
-function prayerMinutes(value: string | null | undefined) {
-  const parsed = parsePrayerTime(value);
-  return parsed ? parsed.hours * 60 + parsed.minutes : null;
-}
-
-function currentVancouverMinutes() {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/Vancouver",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  }).formatToParts(new Date());
-  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
-  return Number(values.hour) * 60 + Number(values.minute);
-}
-
-function nextIqama(prayerTimes: PrayerTimesRecord | null, status: PrayerStatus) {
-  if (status === "loading") return "Loading...";
-  if (!prayerTimes) return "Awqat";
-  const prayers = [
-    { name: "Fajr", time: prayerTimes.fajr_iqamah },
-    { name: "Dhuhr", time: prayerTimes.dhuhr_iqamah },
-    { name: "Asr", time: prayerTimes.asr_iqamah },
-    { name: "Maghrib", time: prayerTimes.maghrib_iqamah },
-    { name: "Isha", time: prayerTimes.isha_iqamah },
-  ].filter((prayer) => prayerMinutes(prayer.time) !== null);
-  const current = currentVancouverMinutes();
-  const next = prayers.find((prayer) => (prayerMinutes(prayer.time) ?? -1) >= current) ?? prayers[0];
-  return next ? `${next.name} ${formatPrayerTime(next.time)}` : "Awqat";
-}
-
 async function fetchPrayerTimes(signal: AbortSignal): Promise<PrayerTimesRecord | null> {
   if (!AWQAT_KEY) return null;
   const params = new URLSearchParams({
     select:
       "prayer_date,fajr_azan,sunrise,dhuhr_azan,asr_azan,maghrib_azan,isha_azan,fajr_iqamah,dhuhr_iqamah,asr_iqamah,maghrib_iqamah,isha_iqamah,jumah_time_1,jumah_time_2,jumah_time_3",
     organization_id: `eq.${AWQAT_MASJID_ID}`,
-    prayer_date: `eq.${vancouverDateString()}`,
+    prayer_date: `eq.${bcDateString()}`,
   });
   const response = await fetch(`${AWQAT_URL}/rest/v1/daily_prayer_times?${params}`, {
     headers: { apikey: AWQAT_KEY, Authorization: `Bearer ${AWQAT_KEY}` },
@@ -308,7 +213,7 @@ function PrayerTimesExperience({ showHero }: { showHero: boolean }) {
             </div>
           </div>
           <dl className="hero__status">
-            <div><dt>Next Iqama</dt><dd>{nextIqama(prayerTimes, status)}</dd></div>
+            <div><dt>Next Iqama</dt><dd>{nextIqama(prayerTimes, status, now ?? new Date())}</dd></div>
             <div><dt>Jumu&apos;ah</dt><dd>{formatPrayerTime(prayerTimes?.jumah_time_1)}</dd></div>
             <div><dt>Calendar</dt><dd>Live</dd></div>
           </dl>
@@ -328,7 +233,7 @@ function PrayerTimesExperience({ showHero }: { showHero: boolean }) {
             </div>
             <div className="date-stack">
               {hijri ? <p className="hijri-date"><span>{hijri.label}</span><small>{hijri.era}</small></p> : null}
-              <p>{now ? vancouverLongDate(now) : "\u00a0"}</p>
+              <p>{now ? bcLongDate(now) : "\u00a0"}</p>
             </div>
           </div>
 

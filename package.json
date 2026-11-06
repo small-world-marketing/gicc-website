@@ -10,7 +10,8 @@
     "cf:types": "wrangler types cloudflare-env.d.ts --include-runtime=false",
     "check": "npm run lint && npm run typecheck && npm run build",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit && tsc -p functions/tsconfig.json --noEmit"
+    "typecheck": "tsc --noEmit && tsc -p functions/tsconfig.json --noEmit",
+    "test:prayer-time": "node --experimental-strip-types --test tests/prayer-time.test.mjs"
   },
   "dependencies": {
     "ical.js": "^2.2.1",

@@ -245,15 +245,11 @@ function PrayerTimesExperience({ showHero }: { showHero: boolean }) {
                 <div className="prayer-card__top"><span lang="ar">{arabic}</span><i><Icon aria-hidden="true" /></i></div>
                 <h3>{name}</h3>
                 <dl>
-                  {prayerCardRows(name, prayerTimes).map((row, index) =>
-                    row.kind === "spacer" ? (
-                      <div className="prayer-card__spacer" aria-hidden="true" key={`spacer-${index}`}><dt>&nbsp;</dt><dd>&nbsp;</dd></div>
-                    ) : (
-                      <div className={row.highlight ? "prayer-card__iqama" : undefined} key={row.label}>
-                        <dt>{row.label}</dt><dd>{formatPrayerTime(row.time)}</dd>
-                      </div>
-                    ),
-                  )}
+                  {prayerCardRows(name, prayerTimes).map((row) => (
+                    <div className={row.highlight ? "prayer-card__iqama" : undefined} key={row.label}>
+                      <dt>{row.label}</dt><dd>{formatPrayerTime(row.time)}</dd>
+                    </div>
+                  ))}
                 </dl>
               </article>
             ))}

@@ -82,21 +82,29 @@ test("Awqat sunrise and Zawal follow the selected BC daily record at midnight", 
   }
 });
 
-test("Dhuhr card reads Zawal, Start, Iqama; other cards keep Start/Iqama level", () => {
+test("prayer cards list rows in time order with no empty rows", () => {
   const record = {
     prayer_date: "2026-11-09",
     fajr_azan: "06:28:00", fajr_iqamah: "06:40:00", sunrise: "08:12:00",
     dhuhr_azan: "12:59:00", dhuhr_iqamah: "13:40:00",
     asr_azan: "15:51:00", asr_iqamah: "16:00:00",
+    maghrib_azan: "17:41:00", maghrib_iqamah: "17:46:00",
+    isha_azan: "19:08:00", isha_iqamah: "20:00:00",
   };
-  const view = (rows) => rows.map((row) => (row.kind === "spacer" ? "spacer" : `${row.label} ${formatPrayerTime(row.time)}`));
+  const view = (rows) => rows.map((row) => `${row.label} ${formatPrayerTime(row.time)}`);
+  assert.deepEqual(view(prayerCardRows("Fajr", record)), ["Start 6:28 AM", "Iqama 6:40 AM", "Sunrise 8:12 AM"]);
   assert.deepEqual(view(prayerCardRows("Dhuhr", record)), ["Zawal 12:49 PM", "Start 12:59 PM", "Iqama 1:40 PM"]);
-  assert.deepEqual(view(prayerCardRows("Fajr", record)), ["spacer", "Start 6:28 AM", "Iqama 6:40 AM", "Sunrise 8:12 AM"]);
-  assert.deepEqual(view(prayerCardRows("Asr", record)), ["spacer", "Start 3:51 PM", "Iqama 4:00 PM"]);
+  assert.deepEqual(view(prayerCardRows("Asr", record)), ["Start 3:51 PM", "Iqama 4:00 PM"]);
+  assert.deepEqual(view(prayerCardRows("Maghrib", record)), ["Start 5:41 PM", "Iqama 5:46 PM"]);
+  assert.deepEqual(view(prayerCardRows("Isha", record)), ["Start 7:08 PM", "Iqama 8:00 PM"]);
+  // Fajr/Dhuhr pair evenly (3 rows each); Asr/Maghrib pair evenly (2 rows each).
+  assert.equal(prayerCardRows("Fajr", record).length, prayerCardRows("Dhuhr", record).length);
+  assert.equal(prayerCardRows("Asr", record).length, prayerCardRows("Maghrib", record).length);
   for (const name of ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"]) {
-    const labels = prayerCardRows(name, record).map((row) => (row.kind === "spacer" ? "slot" : row.label));
-    assert.equal(labels.indexOf("Start"), 1, name);
-    assert.equal(labels.indexOf("Iqama"), 2, name);
+    for (const row of prayerCardRows(name, record)) {
+      assert.ok(row.label.trim(), `${name} has an empty row label`);
+      assert.notEqual(formatPrayerTime(row.time), "-", `${name} ${row.label} has no time`);
+    }
   }
   assert.deepEqual(view(prayerCardRows("Dhuhr", null)), ["Zawal -", "Start -", "Iqama -"]);
 });

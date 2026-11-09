@@ -84,6 +84,35 @@ export function zawalTime(dhuhrAzan: string | null | undefined): string | null {
   return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
 }
 
+export type PrayerName = "Fajr" | "Dhuhr" | "Asr" | "Maghrib" | "Isha";
+export type PrayerCardRow =
+  | { kind: "spacer" }
+  | { kind: "time"; label: string; time: string | null | undefined; highlight?: boolean };
+
+const PRAYER_FIELDS: Record<PrayerName, "fajr" | "dhuhr" | "asr" | "maghrib" | "isha"> = {
+  Fajr: "fajr",
+  Dhuhr: "dhuhr",
+  Asr: "asr",
+  Maghrib: "maghrib",
+  Isha: "isha",
+};
+
+// Card rows in time order. Zawal sits above Dhuhr Start (masjid request, Nov 9 2026);
+// every other card gets a spacer in that slot so Start/Iqama rows stay level.
+// Sunrise (Awqat `sunrise`) stays below Fajr Iqama.
+export function prayerCardRows(name: PrayerName, record: Partial<PrayerTimesRecord> | null | undefined): PrayerCardRow[] {
+  const key = PRAYER_FIELDS[name];
+  const start = record?.[`${key}_azan`];
+  const iqama = record?.[`${key}_iqamah`];
+  const rows: PrayerCardRow[] = [
+    name === "Dhuhr" ? { kind: "time", label: "Zawal", time: zawalTime(start) } : { kind: "spacer" },
+    { kind: "time", label: "Start", time: start },
+    { kind: "time", label: "Iqama", time: iqama, highlight: true },
+  ];
+  if (name === "Fajr") rows.push({ kind: "time", label: "Sunrise", time: record?.sunrise });
+  return rows;
+}
+
 export function formatPrayerTime(value: string | null | undefined) {
   const parsed = parsePrayerTime(value);
   if (!parsed) return "-";

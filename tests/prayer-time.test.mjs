@@ -7,6 +7,7 @@ import {
   formatPrayerTime,
   hijriDateParts,
   nextIqama,
+  prayerCardRows,
   zawalTime,
 } from "../lib/prayer-time.ts";
 
@@ -79,4 +80,23 @@ test("Awqat sunrise and Zawal follow the selected BC daily record at midnight", 
     assert.ok(record);
     assert.equal(zawalTime(record.dhuhr_azan), "12:49");
   }
+});
+
+test("Dhuhr card reads Zawal, Start, Iqama; other cards keep Start/Iqama level", () => {
+  const record = {
+    prayer_date: "2026-11-09",
+    fajr_azan: "06:28:00", fajr_iqamah: "06:40:00", sunrise: "08:12:00",
+    dhuhr_azan: "12:59:00", dhuhr_iqamah: "13:40:00",
+    asr_azan: "15:51:00", asr_iqamah: "16:00:00",
+  };
+  const view = (rows) => rows.map((row) => (row.kind === "spacer" ? "spacer" : `${row.label} ${formatPrayerTime(row.time)}`));
+  assert.deepEqual(view(prayerCardRows("Dhuhr", record)), ["Zawal 12:49 PM", "Start 12:59 PM", "Iqama 1:40 PM"]);
+  assert.deepEqual(view(prayerCardRows("Fajr", record)), ["spacer", "Start 6:28 AM", "Iqama 6:40 AM", "Sunrise 8:12 AM"]);
+  assert.deepEqual(view(prayerCardRows("Asr", record)), ["spacer", "Start 3:51 PM", "Iqama 4:00 PM"]);
+  for (const name of ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"]) {
+    const labels = prayerCardRows(name, record).map((row) => (row.kind === "spacer" ? "slot" : row.label));
+    assert.equal(labels.indexOf("Start"), 1, name);
+    assert.equal(labels.indexOf("Iqama"), 2, name);
+  }
+  assert.deepEqual(view(prayerCardRows("Dhuhr", null)), ["Zawal -", "Start -", "Iqama -"]);
 });

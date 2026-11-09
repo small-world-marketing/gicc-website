@@ -72,6 +72,18 @@ function parsePrayerTime(value: string | null | undefined) {
   return { hours: Number(match[1]), minutes: Number(match[2]) };
 }
 
+// Awqat has no Zawal field: per the masjid, use 10 minutes before Dhuhr start.
+// Sunrise is supplied separately by the Awqat `sunrise` field.
+export function zawalTime(dhuhrAzan: string | null | undefined): string | null {
+  const match = (dhuhrAzan ?? "").trim().match(/^(\d{1,2}):(\d{2})(?::(\d{2})(?:\.\d+)?)?$/);
+  if (!match) return null;
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  if (hours > 23 || minutes > 59 || (match[3] !== undefined && Number(match[3]) > 59)) return null;
+  const total = (hours * 60 + minutes - 10 + 1440) % 1440;
+  return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
+}
+
 export function formatPrayerTime(value: string | null | undefined) {
   const parsed = parsePrayerTime(value);
   if (!parsed) return "-";

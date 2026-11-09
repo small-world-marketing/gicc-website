@@ -22,6 +22,7 @@ import {
   formatPrayerTime,
   hijriDateParts,
   nextIqama,
+  zawalTime,
   type PrayerStatus,
   type PrayerTimesRecord,
 } from "@/lib/prayer-time";
@@ -185,8 +186,8 @@ function PrayerTimesExperience({ showHero }: { showHero: boolean }) {
 
   const closeMonthly = useCallback(() => setShowMonthly(false), []);
   const prayers = [
-    { name: "Fajr", arabic: "الفجر", Icon: Sunrise, start: prayerTimes?.fajr_azan, iqama: prayerTimes?.fajr_iqamah },
-    { name: "Dhuhr", arabic: "الظهر", Icon: Sun, start: prayerTimes?.dhuhr_azan, iqama: prayerTimes?.dhuhr_iqamah },
+    { name: "Fajr", arabic: "الفجر", Icon: Sunrise, start: prayerTimes?.fajr_azan, iqama: prayerTimes?.fajr_iqamah, extra: { label: "Sunrise", time: prayerTimes?.sunrise } },
+    { name: "Dhuhr", arabic: "الظهر", Icon: Sun, start: prayerTimes?.dhuhr_azan, iqama: prayerTimes?.dhuhr_iqamah, extra: { label: "Zawal", time: zawalTime(prayerTimes?.dhuhr_azan) } },
     { name: "Asr", arabic: "العصر", Icon: CloudSun, start: prayerTimes?.asr_azan, iqama: prayerTimes?.asr_iqamah },
     { name: "Maghrib", arabic: "المغرب", Icon: Sunset, start: prayerTimes?.maghrib_azan, iqama: prayerTimes?.maghrib_iqamah },
     { name: "Isha", arabic: "العشاء", Icon: Moon, start: prayerTimes?.isha_azan, iqama: prayerTimes?.isha_iqamah },
@@ -238,13 +239,14 @@ function PrayerTimesExperience({ showHero }: { showHero: boolean }) {
           </div>
 
           <div className="prayer-grid" aria-live="polite" aria-busy={status === "loading"}>
-            {prayers.map(({ name, arabic, Icon, start, iqama }) => (
+            {prayers.map(({ name, arabic, Icon, start, iqama, extra }) => (
               <article className="prayer-card" key={name}>
                 <div className="prayer-card__top"><span lang="ar">{arabic}</span><i><Icon aria-hidden="true" /></i></div>
                 <h3>{name}</h3>
                 <dl>
                   <div><dt>Start</dt><dd>{formatPrayerTime(start)}</dd></div>
-                  <div><dt>Iqama</dt><dd>{formatPrayerTime(iqama)}</dd></div>
+                  <div className="prayer-card__iqama"><dt>Iqama</dt><dd>{formatPrayerTime(iqama)}</dd></div>
+                  {extra ? <div><dt>{extra.label}</dt><dd>{formatPrayerTime(extra.time)}</dd></div> : null}
                 </dl>
               </article>
             ))}

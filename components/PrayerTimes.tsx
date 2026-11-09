@@ -22,7 +22,8 @@ import {
   formatPrayerTime,
   hijriDateParts,
   nextIqama,
-  zawalTime,
+  prayerCardRows,
+  type PrayerName,
   type PrayerStatus,
   type PrayerTimesRecord,
 } from "@/lib/prayer-time";
@@ -185,12 +186,12 @@ function PrayerTimesExperience({ showHero }: { showHero: boolean }) {
   }, []);
 
   const closeMonthly = useCallback(() => setShowMonthly(false), []);
-  const prayers = [
-    { name: "Fajr", arabic: "الفجر", Icon: Sunrise, start: prayerTimes?.fajr_azan, iqama: prayerTimes?.fajr_iqamah, extra: { label: "Sunrise", time: prayerTimes?.sunrise } },
-    { name: "Dhuhr", arabic: "الظهر", Icon: Sun, start: prayerTimes?.dhuhr_azan, iqama: prayerTimes?.dhuhr_iqamah, extra: { label: "Zawal", time: zawalTime(prayerTimes?.dhuhr_azan) } },
-    { name: "Asr", arabic: "العصر", Icon: CloudSun, start: prayerTimes?.asr_azan, iqama: prayerTimes?.asr_iqamah },
-    { name: "Maghrib", arabic: "المغرب", Icon: Sunset, start: prayerTimes?.maghrib_azan, iqama: prayerTimes?.maghrib_iqamah },
-    { name: "Isha", arabic: "العشاء", Icon: Moon, start: prayerTimes?.isha_azan, iqama: prayerTimes?.isha_iqamah },
+  const prayers: { name: PrayerName; arabic: string; Icon: typeof Sun }[] = [
+    { name: "Fajr", arabic: "الفجر", Icon: Sunrise },
+    { name: "Dhuhr", arabic: "الظهر", Icon: Sun },
+    { name: "Asr", arabic: "العصر", Icon: CloudSun },
+    { name: "Maghrib", arabic: "المغرب", Icon: Sunset },
+    { name: "Isha", arabic: "العشاء", Icon: Moon },
   ];
   const jumuahs = [
     { name: "Jumu'ah 1", audience: "Brothers only", time: prayerTimes?.jumah_time_1 },
@@ -239,14 +240,20 @@ function PrayerTimesExperience({ showHero }: { showHero: boolean }) {
           </div>
 
           <div className="prayer-grid" aria-live="polite" aria-busy={status === "loading"}>
-            {prayers.map(({ name, arabic, Icon, start, iqama, extra }) => (
+            {prayers.map(({ name, arabic, Icon }) => (
               <article className="prayer-card" key={name}>
                 <div className="prayer-card__top"><span lang="ar">{arabic}</span><i><Icon aria-hidden="true" /></i></div>
                 <h3>{name}</h3>
                 <dl>
-                  <div><dt>Start</dt><dd>{formatPrayerTime(start)}</dd></div>
-                  <div className="prayer-card__iqama"><dt>Iqama</dt><dd>{formatPrayerTime(iqama)}</dd></div>
-                  {extra ? <div><dt>{extra.label}</dt><dd>{formatPrayerTime(extra.time)}</dd></div> : null}
+                  {prayerCardRows(name, prayerTimes).map((row, index) =>
+                    row.kind === "spacer" ? (
+                      <div className="prayer-card__spacer" aria-hidden="true" key={`spacer-${index}`}><dt>&nbsp;</dt><dd>&nbsp;</dd></div>
+                    ) : (
+                      <div className={row.highlight ? "prayer-card__iqama" : undefined} key={row.label}>
+                        <dt>{row.label}</dt><dd>{formatPrayerTime(row.time)}</dd>
+                      </div>
+                    ),
+                  )}
                 </dl>
               </article>
             ))}

@@ -4209,6 +4209,15 @@ html {
   line-height: 26px;
 }
 
+/* Empty slot matching the Dhuhr Zawal row so Start/Iqama stay level across cards. */
+.prayer-card dl .prayer-card__spacer {
+  visibility: hidden;
+}
+
+.prayer-card dl .prayer-card__spacer + div {
+  border-top-color: transparent;
+}
+
 .prayer-card dl .prayer-card__iqama dd {
   color: #fdd48d;
 }
